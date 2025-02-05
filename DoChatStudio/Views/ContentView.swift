@@ -1,0 +1,114 @@
+//  ContentView.swift
+//  DoChatStudio
+//
+//  Created by Cosas on 1/28/25.
+//
+
+import SwiftUI
+import FlexView
+
+struct ContentView: View {
+    
+    @ObservedObject var document: DoChatStudioDocument
+    @State private var ratio: CGFloat = 0.5
+    @State private var childRatio: CGFloat = 0.5
+    @State private var isDragging: Bool = false
+    
+    
+    var body: some View {
+        VStack{
+            if document.url == nil {
+                SelectModelView(document: document)
+            }
+            
+            if  document.llm != nil {
+                Group {
+                    FlexView(
+                        children: [
+                            {
+                                AnyView(ModelInfoView(document: document, llm: document.llm!))
+                            }(),
+                            {if let _ = document.llm {
+                                return AnyView(ModelAdjustmentView(document: document, llm: document.llm!))
+                            } else {
+                                return AnyView(ErrorView(errorString: "No Model Selected"))
+                            }}(),
+                            {if let _ = document.llm {
+                                return AnyView(ChatHistoryView(document: document, llm: document.llm!))
+                            } else {
+                                return AnyView(ErrorView(errorString: "No Model Selected"))
+                            }}(),
+                        ],
+                        ratio: $ratio,
+                        childRatio: $childRatio,
+                        isDragging: $isDragging,
+                        configuration: FlexView.Configuration(
+                            splitDirection: .horizontal,
+                            innerPadding: 5.0,
+                            showsCrosshair: true,
+                            crosshairView: crosshairView(),
+                            secondaryOrientation: true
+                        )
+                    )
+                    .padding()
+                }
+            }
+        }
+    }
+}
+
+
+#Preview {
+    ContentView(document: DoChatStudioDocument())
+}
+
+
+extension Color {
+    
+    enum Level {
+        case light
+        case medium
+        case high
+    }
+    
+    func opacity(_ colorScheme: ColorScheme, _ level: Level = .light) -> Color {
+        switch level {
+        case .light:
+            return self.opacity(colorScheme == .light ? 0.5 : 0.157)
+        case .medium:
+            return self.opacity(colorScheme == .light ? 0.7 : 0.314)
+        case .high:
+            return self.opacity(colorScheme == .light ? 0.9 : 0.928)
+        }
+    }
+}
+
+struct ErrorView: View {
+    let errorString: String
+    let errorDescription: String? = nil
+    
+    var body: some View {
+        VStack(){
+            Text(errorString)
+                .font(.largeTitle)
+            Text(errorDescription ?? "")
+                .font(.body)
+        }
+    }
+}
+
+private func crosshairView(_ hue: Double = 0.1175) -> AnyView {
+    //    let yellowLight = Color.init(hue: hue, saturation: 1.0, brightness: 0.92, opacity: 1.0)
+    //    let yellowDark = Color.init(hue: hue, saturation: 1.0, brightness: 0.65, opacity: 1.0)
+    
+    let crossHairReturnView =
+    Group {
+        //        let gradient = LinearGradient(colors: [yellowLight, yellowDark], startPoint: .bottomTrailing, endPoint: .topLeading)
+        Circle()
+            .fill(DoStyle.gradient(color: .orange))
+            .shadow(radius: 2)
+            .overlay(Circle().fill(Color.clear).strokeBorder(DoStyle.gradient(color: .orange), lineWidth: 5).shadow(radius: 2).rotationEffect(Angle(degrees: 180)))
+            .frame(width: 24, height: 24)
+    }
+    return AnyView(crossHairReturnView)
+}

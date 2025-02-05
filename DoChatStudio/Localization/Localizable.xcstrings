@@ -1,0 +1,96 @@
+{
+  "sourceLanguage" : "en",
+  "strings" : {
+    "" : {
+
+    },
+    "❄️" : {
+
+    },
+    "❓" : {
+
+    },
+    "🎨" : {
+
+    },
+    "🎲" : {
+
+    },
+    "📖" : {
+
+    },
+    "📜" : {
+
+    },
+    "🔁" : {
+
+    },
+    "🔥" : {
+
+    },
+    "🖌️" : {
+
+    },
+    "Architecture: %@" : {
+
+    },
+    "Author: %@" : {
+
+    },
+    "Chat" : {
+
+    },
+    "Choose..." : {
+
+    },
+    "Default" : {
+
+    },
+    "History Limit" : {
+
+    },
+    "History Limit: %d" : {
+
+    },
+    "hparams: %@" : {
+
+    },
+    "IOU ResetView" : {
+
+    },
+    "Name: %@" : {
+
+    },
+    "No Default Model" : {
+
+    },
+    "Path: %@" : {
+
+    },
+    "Seed: %u" : {
+
+    },
+    "Select Model" : {
+
+    },
+    "Temperature" : {
+
+    },
+    "Temperature: %.2f" : {
+
+    },
+    "TopK" : {
+
+    },
+    "TopK: %d" : {
+
+    },
+    "TopP" : {
+
+    },
+    "TopP: %.2f" : {
+
+    }
+  },
+  "version" : "1.0"
+}
