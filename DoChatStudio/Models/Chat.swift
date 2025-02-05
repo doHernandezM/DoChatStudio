@@ -8,6 +8,8 @@
 
 import SwiftUI
 
+
+
 public struct Chat: Identifiable, Codable {
     public let id: UUID
     
@@ -16,6 +18,7 @@ public struct Chat: Identifiable, Codable {
     public let timestamp: Date
     public var tokens: Int = 0
     public var ignored: Bool = false
+    public var llmState: LLMState? = nil
     
     enum CodingKeys: String, CodingKey {
         case id
@@ -36,12 +39,13 @@ public struct Chat: Identifiable, Codable {
         self.ignored = try container.decode(Bool.self, forKey: .ignored)
     }
     
-    public init (role: Role?, content: String, ignored: Bool = false) {
+    public init (role: Role?, content: String, ignored: Bool = false, llmState: LLMState? = nil) {
         self.id = UUID()
         self.role = role
         self.content = content
         self.timestamp = Date()
         self.ignored = ignored
+        self.llmState = llmState
     }
     
     public func encode(to encoder: any Encoder) throws {

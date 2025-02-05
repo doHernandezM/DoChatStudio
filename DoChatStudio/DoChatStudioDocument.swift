@@ -111,7 +111,7 @@ class DoChatStudioDocument: FileDocument, Codable, ObservableObject/*, LLMOutput
     }
     
     func initLLM(path: URL? = nil) {
-//        objectWillChange.send()
+        //        objectWillChange.send()
         llm = nil
         
         
@@ -125,35 +125,35 @@ class DoChatStudioDocument: FileDocument, Codable, ObservableObject/*, LLMOutput
         print("DoChat LLLM Init Start \nURL:\(url?.path() ?? "Path N/A")")
         print(".......................................................................................")
         
-//        if ((url?.startAccessingSecurityScopedResource()) != nil) {
-            
-            do {
-                let result = try Data(contentsOf: url!)
-                print("URL Load Results:\(result)")
-                urlExists = true
-//                objectWillChange.send()
-            } catch {
-                print("URL Load Error:\(error)")
-                urlExists = false
-                if !urlLoadError {
-                    urlLoadError = true
-                    initLLM(path: nil)
-                    print("initllm16")
-                }
+        //        if ((url?.startAccessingSecurityScopedResource()) != nil) {
+        
+        do {
+            let result = try Data(contentsOf: url!)
+            print("URL Load Results:\(result)")
+            urlExists = true
+            //                objectWillChange.send()
+        } catch {
+            print("URL Load Error:\(error)")
+            urlExists = false
+            if !urlLoadError {
+                urlLoadError = true
+                initLLM(path: nil)
+                print("initllm16")
             }
+        }
+        
+        if !urlExists {
+            print("URL does not exist")
             
-            if !urlExists {
-                print("URL does not exist")
-                
-                self.llm = nil
-                
-//                url?.stopAccessingSecurityScopedResource()
-                
-                return
-            }
-            print(".......................................................................................")
+            self.llm = nil
             
+            //                url?.stopAccessingSecurityScopedResource()
             
+            return
+        }
+        print(".......................................................................................")
+        
+        
         DispatchQueue.main.async {
             if let llm = LLM.init(from: self.url!, template: .customJinja(self.systemPrompt)) {
                 self.urlExists = true
@@ -169,7 +169,7 @@ class DoChatStudioDocument: FileDocument, Codable, ObservableObject/*, LLMOutput
                 print("Info: \(llm.systemInfo())")
                 print("DoChat initialized successfully: @ \n URL:\(self.url!.absoluteString) \n Author:\(llm.modelAuthor) \r Architecture:\(llm.modelArchitecture) \t Quantization Type:\(llm.modelQuantizationType)")
                 
-//                url?.stopAccessingSecurityScopedResource()
+                //                url?.stopAccessingSecurityScopedResource()
                 
                 self.objectWillChange.send()
                 self.llm = llm
@@ -181,44 +181,39 @@ class DoChatStudioDocument: FileDocument, Codable, ObservableObject/*, LLMOutput
             
             if self.llm == nil {print("Model Not Loaded")}
             
-//            url?.stopAccessingSecurityScopedResource()
+            //            url?.stopAccessingSecurityScopedResource()
         }
         
     }
     
     
     func respond(input: String) -> Void {
-//        Task {
+        
+        if llm?.isThinking == false {
+            llm?.isThinking = true
+            llm?.shouldPausePredicting = false
+            
             DispatchQueue.main.async { [self] in
                 history.append(Chat(role: .user, content: input))
-                llm?.isThinking = true
             }
-            //            let file = UnsafeMutablePointer<FILE>.allocate(capacity: 1)
             
-            //            print("LLM Perf:\(llm?.dumpPerfYaml(to: file))")
-            //            print("LLM Perf:\(file.pointee)")
-            //
-        Task  { 
+            Task  {
                 await llm?.respond(to: input)
                 
-                //            print("LLM Perf:\(llm?.dumpPerfYaml(to: file))")
-                //            print("LLM Perf:\(file.pointee)")
-                //
                 DispatchQueue.main.async { [self] in
                     let chat = Chat(role: .bot, content: llm?.output ?? "")
-                    
                     history.append(chat)
                     llm?.isThinking = false
                 }
-//            }
+            }
+            
+        } else {
+            llm?.shouldPausePredicting = true
         }
     }
     
     func stop() {
         llm?.stop()
-        DispatchQueue.main.async { [self] in
-            llm?.isThinking = false
-        }
     }
     
 }

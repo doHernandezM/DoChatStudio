@@ -15,40 +15,76 @@ struct DeltaInfo {
     static public let shared = InferenceActor()
 }
 
-open class LLM: ObservableObject {
-    public enum LLMState: String {
-        // The model is loading, initializing, or being set up.
-        case initializing = "Initializing"
-        
-        // The model is ready and waiting for input.
-        case idle = "Idle"
-        
-        // The model is processing the input (e.g., tokenizing or setting context).
-        case preparing = "Preparing"
-        
-        // The model is in the process of generating tokens.
-        case thinking = "Thinking"
-        
-        // Actively generating a response from the model.
-        case generating = "Generating"
-        
-        // The model is finalizing or wrapping up the output.
-        case finishing = "Finishing"
-        
-        // The generation has been interrupted (e.g., by a stop request).
-        case stopped = "Stopped"
-        
-        // The model encountered an error or needs to recover.
-        case error = "Error"
-        
-        // Additional states that may be useful:
-        
-        // When the model is downloading resources (e.g., from Hugging Face).
-        case downloading = "Downloading"
-        
-        // When updating progress or performing minor adjustments.
-        case updating = "Updating"
+
+    
+public enum LLMState: String {
+    // The model is loading, initializing, or being set up.
+    case initializing = "Initializing"
+    
+    // The model is ready and waiting for input.
+    case idle = "Idle"
+    
+    // The model is processing the input (e.g., tokenizing or setting context).
+    case preparing = "Preparing"
+    
+    // The model is in the process of generating tokens.
+    case thinking = "Thinking"
+    
+    // Actively generating a response from the model.
+    case generating = "Generating"
+    
+    // The model is finalizing or wrapping up the output.
+    case finishing = "Finishing"
+    
+    // The generation has been interrupted (e.g., by a stop request).
+    case stopped = "Stopped"
+    
+    // The generation has been paused.
+    case paused = "Paused"
+    
+    // The model encountered an error or needs to recover.
+    case error = "Error"
+    
+    // Additional states that may be useful:
+    
+    // When the model is downloading resources (e.g., from Hugging Face).
+    case downloading = "Downloading"
+    
+    // When updating progress or performing minor adjustments.
+    case updating = "Updating"
+    
+    
+    var color: Color {
+        get {
+            var llmColor: Color? = nil
+            switch self {
+            case .initializing:
+                llmColor = .pink
+            case .idle:
+                llmColor = .blue
+            case .preparing:
+                llmColor = .mint
+            case .thinking:
+                llmColor = .teal
+            case .generating:
+                llmColor = .cyan
+            case .finishing:
+                llmColor = .green
+            case .stopped:
+                llmColor = .gray
+            case .paused:
+                llmColor = .yellow.mix(with: .blue, by: 0.25)
+            case .error:
+                llmColor = .red
+            case .downloading:
+                llmColor = .orange
+            case .updating:
+                llmColor = .yellow
+            }
+            return llmColor == nil ? .gray : llmColor!
+        }
     }
+}
     /// A protocol to receive updates when the LLM's output changes.
     public protocol LLMOutputDelegate: AnyObject {
         //    var rawOutputString: String { get set }
@@ -57,7 +93,9 @@ open class LLM: ObservableObject {
         func newOutput(outputChat: Chat)
     }
     
+open class LLM: ObservableObject {
     @Published public var llmState: LLMState = LLMState.initializing
+
     
     @Published public var model: Model
     public var path: [CChar]
@@ -145,6 +183,7 @@ open class LLM: ObservableObject {
         if UnsafeRawPointer(model) == nil {
             // Model failed to load; handle the error.
             print("Error: Model could not be loaded from path \(self.path)")
+            self.llmState = .error
             return nil
         }
         
@@ -168,6 +207,7 @@ open class LLM: ObservableObject {
         self.stopSequence = stopSequence?.utf8CString
         self.stopSequenceLength = (self.stopSequence?.count ?? 1) - 1
         batch = llama_batch_init(Int32(self.maxTokenCount), 0, 1)
+        self.llmState = .idle
         objectWillChange.send()
     }
     
@@ -256,9 +296,13 @@ open class LLM: ObservableObject {
         
     }
     
-    private var shouldContinuePredicting = false
+    public var shouldContinuePredicting = false
+    public var shouldPausePredicting = false
     public func stop() {
+        isThinking = false
+        shouldPausePredicting = false
         shouldContinuePredicting = false
+        self.llmState = .stopped
     }
     
     @InferenceActor
@@ -278,7 +322,6 @@ open class LLM: ObservableObject {
         batch.clear()
         batch.add(token, currentCount, [0], true)
         context.decode(batch)
-        print("predictNextToken")
         return token
     }
     
@@ -286,7 +329,6 @@ open class LLM: ObservableObject {
     private var decoded = ""
     
     open func recoverFromLengthy(_ input: borrowing String, to output:  borrowing AsyncStream<String>.Continuation) {
-        print("recoverFrom")
         output.yield("tl;dr")
     }
     
@@ -306,8 +348,7 @@ open class LLM: ObservableObject {
             if maxTokenCount <= currentCount {
                 isFull = true
                 recoverFromLengthy(input, to: output)
-                print("preFalse")
-                
+                self.llmState = .error
                 return false
             }
         }
@@ -316,15 +357,15 @@ open class LLM: ObservableObject {
             batch.add(token, batch.n_tokens, [0], i == initialCount - 1)
         }
         context.decode(batch)
-        shouldContinuePredicting = true
-        print("prepTrue")
+            self.shouldContinuePredicting = true
+        
         return true
     }
     
     @InferenceActor
     private func finishResponse(from response: inout [String], to output: borrowing AsyncStream<String>.Continuation) async {
         multibyteCharacter.removeAll()
-        llmState = .finishing
+        await MainActor.run { self.llmState = .finishing }
         
         var input = ""
         if !history.isEmpty {
@@ -335,18 +376,18 @@ open class LLM: ObservableObject {
             input = preprocess(self.input, history)
             input += response.joined()
         }
-        let rest = getResponse(from: input, progressHandler:
-                                {delta in
-            print(delta)
-        })
+        let rest = getResponse(from: input)
         for await restDelta in rest {
             output.yield(restDelta)
         }
+        
+        await MainActor.run { self.llmState = .idle }
     }
     
     private func process(_ token: Token, to output: borrowing AsyncStream<String>.Continuation) -> Bool {
-        print("process")
-        
+//        DispatchQueue.main.async{
+//            self.llmState = .generating
+//        }
         struct saved {
             static var stopSequenceEndIndex = 0
             static var letters: [CChar] = []
@@ -381,21 +422,22 @@ open class LLM: ObservableObject {
         return true
     }
     
-    private func getResponse(from input: String, progressHandler: @escaping (DeltaInfo) -> Void) -> AsyncStream<String> {
+    private func getResponse(from input: String) -> AsyncStream<String> {
         
         .init { output in Task {
-            print("getResponse")
+            await MainActor.run { self.llmState = .preparing }
             
             defer { context = nil }
             guard prepare(from: input, to: output) else { return output.finish() }
             var response: [String] = []
-            while currentCount < maxTokenCount {
+            
+            await MainActor.run { self.llmState = .generating }
+            
+            while currentCount < maxTokenCount && shouldPausePredicting != true  {
                 let token = await predictNextToken()
                 if !process(token, to: output) { return output.finish() }
                 currentCount += 1
                 
-                // Call the progress handler
-                progressHandler(DeltaInfo(tokensAdded: 1))
             }
             await finishResponse(from: &response, to: output)
             return output.finish()
@@ -407,26 +449,22 @@ open class LLM: ObservableObject {
     
     @InferenceActor
     public func getCompletion(from input: borrowing String) async -> String {
-        print("getCompletion")
+        await MainActor.run { self.llmState = .thinking }
         
         guard isAvailable else { fatalError("LLM is being used") }
         isAvailable = false
-        let response = getResponse(from: input, progressHandler:
-                                    {delta in
-            print(delta)
-        }
-        )
+        let response = getResponse(from: input)
         var output = ""
         for await responseDelta in response {
             output += responseDelta
         }
         isAvailable = true
+        await MainActor.run { self.llmState = .idle }
         return output
     }
     
     @InferenceActor
     public func respond(to input: String, with makeOutputFrom: @escaping (AsyncStream<String>) async -> String) async {
-        print("respond2A")
         
         guard isAvailable else { return }
         isAvailable = false
@@ -434,32 +472,31 @@ open class LLM: ObservableObject {
         history += [Chat(role: .user, content: input)]
         
         let processedInput = preprocess(input, history)
-        
-        var tokensGenerated = 0
-        
-        let response = getResponse(from: processedInput, progressHandler: { delta in
-            tokensGenerated += delta.tokensAdded
-        })
+                
+        let response = getResponse(from: processedInput)
         
         let output = await makeOutputFrom(response)
         
         //delegate
-        var outputChat = Chat(role: .bot, content: output)
+        let outputChat = Chat(role: .bot, content: output)
         //        delegate?.newOutput(outputChat: outputChat)
-        outputChat.tokens = tokensGenerated
+//        outputChat.tokens = tokensGenerated
         history += [outputChat]
         
         let historyCount = history.count
         if historyLimit < historyCount {
             history.removeFirst(min(2, historyCount))
         }
+        await MainActor.run { self.llmState = .finishing }
         
         postprocess(output)
+        
+        await MainActor.run { self.llmState = .idle }
+        
         isAvailable = true
     }
     
     open func respond(to input: String) async {
-        print("respond2B")
         
         await respond(to: input) { [self] response in
             await setOutput(to: "")
@@ -470,7 +507,6 @@ open class LLM: ObservableObject {
             update(nil)
             let trimmedOutput = output.trimmingCharacters(in: .whitespacesAndNewlines)
             await setOutput(to: trimmedOutput.isEmpty ? "..." : trimmedOutput)
-            
             
             return output
         }
@@ -511,8 +547,6 @@ extension llama_batch {
     }
     
     mutating func add(_ token: Token, _ position: Int32, _ ids: [Int], _ logit: Bool) {
-        print("toke")
-        
         let i = Int(self.n_tokens)
         self.token[i] = token
         self.pos[i] = position
