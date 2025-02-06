@@ -53,7 +53,6 @@ public enum LLMState: String {
     // When updating progress or performing minor adjustments.
     case updating = "Updating"
     
-    
     var color: Color {
         get {
             var llmColor: Color? = nil
@@ -73,7 +72,7 @@ public enum LLMState: String {
             case .stopped:
                 llmColor = .gray
             case .paused:
-                llmColor = .yellow.mix(with: .blue, by: 0.25)
+                llmColor = .yellow.mix(with: .blue, by: 0.1)
             case .error:
                 llmColor = .red
             case .downloading:
@@ -93,13 +92,13 @@ public enum LLMState: String {
         func newOutput(outputChat: Chat)
     }
     
+//LLM.swift
+
 open class LLM: ObservableObject {
     @Published public var llmState: LLMState = LLMState.initializing
 
-    
     @Published public var model: Model
     public var path: [CChar]
-    
     
     //Model Info
     @Published public var modelName: String = ""
@@ -107,10 +106,10 @@ open class LLM: ObservableObject {
     @Published public var modelAuthor: String = ""
     @Published public var modelQuantizationType: String = ""
     
-    //Thinkning
+    //Thinking
     public var preprocess: (_ input: String, _ history: [Chat]) -> String = { input, _ in return input }
-    public var postprocess: (_ output: String) -> Void                    = { print($0) }
-    public var update: (_ outputDelta: String?) -> Void                   = { _ in }
+    public var postprocess: (_ output: String) -> Void = { print($0) }
+    public var update: (_ outputDelta: String?) -> Void = { _ in }
     public var template: Template? = nil {
         didSet {
             guard let template else {
@@ -293,7 +292,6 @@ open class LLM: ObservableObject {
         )
         self.preprocess = template.preprocess
         self.template = template
-        
     }
     
     public var shouldContinuePredicting = false
@@ -308,6 +306,7 @@ open class LLM: ObservableObject {
     @InferenceActor
     private func predictNextToken() async -> Token {
         guard shouldContinuePredicting else { return model.endToken }
+        
         let samplerParams = llama_sampler_chain_default_params()
         let sampler = llama_sampler_chain_init(samplerParams)
         
@@ -315,20 +314,25 @@ open class LLM: ObservableObject {
         llama_sampler_chain_add(sampler, llama_sampler_init_top_p(topP, 1))
         llama_sampler_chain_add(sampler, llama_sampler_init_temp(temp))
         llama_sampler_chain_add(sampler, llama_sampler_init_dist(seed))
-        
+
         let i = batch.n_tokens - 1
         let token = llama_sampler_sample(sampler, context.pointer, i)
+
+        if token == model.endToken {
+            shouldContinuePredicting = false  // Ensure stopping condition is set
+        }
         
         batch.clear()
         batch.add(token, currentCount, [0], true)
         context.decode(batch)
+
         return token
     }
     
     private var currentCount: Int32!
     private var decoded = ""
     
-    open func recoverFromLengthy(_ input: borrowing String, to output:  borrowing AsyncStream<String>.Continuation) {
+    open func recoverFromLengthy(_ input: borrowing String, to output: borrowing AsyncStream<String>.Continuation) {
         output.yield("tl;dr")
     }
     
@@ -357,7 +361,7 @@ open class LLM: ObservableObject {
             batch.add(token, batch.n_tokens, [0], i == initialCount - 1)
         }
         context.decode(batch)
-            self.shouldContinuePredicting = true
+        self.shouldContinuePredicting = true
         
         return true
     }
@@ -385,9 +389,6 @@ open class LLM: ObservableObject {
     }
     
     private func process(_ token: Token, to output: borrowing AsyncStream<String>.Continuation) -> Bool {
-//        DispatchQueue.main.async{
-//            self.llmState = .generating
-//        }
         struct saved {
             static var stopSequenceEndIndex = 0
             static var letters: [CChar] = []
@@ -423,7 +424,6 @@ open class LLM: ObservableObject {
     }
     
     private func getResponse(from input: String) -> AsyncStream<String> {
-        
         .init { output in Task {
             await MainActor.run { self.llmState = .preparing }
             
@@ -433,15 +433,45 @@ open class LLM: ObservableObject {
             
             await MainActor.run { self.llmState = .generating }
             
-            while currentCount < maxTokenCount && shouldPausePredicting != true  {
-                let token = await predictNextToken()
-                if !process(token, to: output) { return output.finish() }
-                currentCount += 1
+            // Main token-generation loop
+            while currentCount < maxTokenCount {
+                // Check for termination condition
+                if !shouldContinuePredicting {
+                    break
+                }
                 
+                // Handle pause/resume efficiently
+                if shouldPausePredicting {
+                    await MainActor.run {
+                        if self.llmState != .paused {
+                            self.llmState = .paused
+                        }
+                    }
+                    
+                    repeat {
+                        try await Task.sleep(nanoseconds: 50_000_000)
+                    } while shouldPausePredicting && shouldContinuePredicting
+                    
+                    // Resume generation only if it's still running
+                    await MainActor.run {
+                        if shouldContinuePredicting {
+                            self.llmState = .generating
+                        }
+                    }
+                }
+                
+                let token = await predictNextToken()
+                if !process(token, to: output) { break }
+                currentCount += 1
             }
-            await finishResponse(from: &response, to: output)
+            
+            // Only finish response if not forcibly stopped.
+            if shouldContinuePredicting {
+                await finishResponse(from: &response, to: output)
+            }
+            
             return output.finish()
-        } }
+        }}
     }
     
     private var input: String = ""
@@ -465,22 +495,18 @@ open class LLM: ObservableObject {
     
     @InferenceActor
     public func respond(to input: String, with makeOutputFrom: @escaping (AsyncStream<String>) async -> String) async {
-        
         guard isAvailable else { return }
         isAvailable = false
         self.input = input
         history += [Chat(role: .user, content: input)]
         
         let processedInput = preprocess(input, history)
-                
         let response = getResponse(from: processedInput)
         
         let output = await makeOutputFrom(response)
         
-        //delegate
+        // delegate
         let outputChat = Chat(role: .bot, content: output)
-        //        delegate?.newOutput(outputChat: outputChat)
-//        outputChat.tokens = tokensGenerated
         history += [outputChat]
         
         let historyCount = history.count
@@ -497,7 +523,6 @@ open class LLM: ObservableObject {
     }
     
     open func respond(to input: String) async {
-        
         await respond(to: input) { [self] response in
             await setOutput(to: "")
             for await responseDelta in response {
@@ -507,7 +532,6 @@ open class LLM: ObservableObject {
             update(nil)
             let trimmedOutput = output.trimmingCharacters(in: .whitespacesAndNewlines)
             await setOutput(to: trimmedOutput.isEmpty ? "..." : trimmedOutput)
-            
             return output
         }
     }
@@ -526,7 +550,6 @@ open class LLM: ObservableObject {
         model.encode(text)
     }
 }
-///Moved to model.swift
 
 private class Context {
     let pointer: OpaquePointer

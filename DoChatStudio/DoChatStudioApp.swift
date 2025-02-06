@@ -12,17 +12,13 @@ struct DoChatStudioApp: App {
     @Environment(\.colorScheme) var colorScheme
 
     var body: some Scene {
-        DocumentGroup(newDocument: DoChatStudioDocument()) { file in
+        DocumentGroup(newDocument: DoChatStudioDocument(text: "")) { file in
+            Group {
                 ContentView(document: file.document)
-//                .background(.white)
-//                .colorScheme(.light)
-                            .background(colorScheme == .dark
-                                        ?
-                                .brown.opacity(0.25)
-                                        :
-                                    .brown.opacity(0.25)
-                            )
-                            .blendMode(.normal/*.luminosity*/)
+            }
+            .onAppear() {
+                print("file:\(file)")
+            }
         }
     }
 }

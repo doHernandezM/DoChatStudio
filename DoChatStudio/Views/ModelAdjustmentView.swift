@@ -168,5 +168,5 @@ struct ModelAdjustmentView: View {
 }
 
 #Preview {
-    ModelAdjustmentView(document: DoChatStudioDocument(), llm: LLM(from: "")!)
+    ModelAdjustmentView(document: DoChatStudioDocument(text: "Chat"), llm: LLM(from: "")!)
 }

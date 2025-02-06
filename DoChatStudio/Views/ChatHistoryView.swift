@@ -10,6 +10,8 @@ struct ChatHistoryView: View {
     @ObservedObject var document: DoChatStudioDocument
     @ObservedObject var llm: LLM
         
+    @State var showX: Bool = false
+    
     let emptyID: UUID = UUID()
     
     var body: some View {
@@ -19,6 +21,16 @@ struct ChatHistoryView: View {
                 ForEach(document.history, id: \.id) { chat in
                     ChatBubbleView(chat: chat)
                         .padding(2)
+                        .overlay(alignment: .topTrailing) {
+                            if showX {
+//                                GeometryReader { geometry in
+                                    Image(systemName: "x.square.fill")
+                                        .font(.largeTitle)
+                                        .foregroundStyle(.red)
+//                                        .padding(.leading, chat.role == .bot ? geometry.frame(in: .local).width : 0)
+//                                }
+                            }
+                        }
                 }
                 if (document.llm?.isThinking ?? false) {
                     ChatBubbleView(chat: Chat(role: .bot, content: document.llm?.output ?? "", ignored: false, llmState: llm.llmState))
@@ -26,14 +38,16 @@ struct ChatHistoryView: View {
             }
             .defaultScrollAnchor(.bottom)
             .cornerRadius(4)
-            
+            .onHover { i in
+                showX = i
+            }
             
             ChatInputView(document: document, llm: llm)
             
                 
             
         }
-        .padding(6)
+        .padding()
         .background(Color.black.opacity(0.075)).cornerRadius(10)
     }
     
@@ -45,7 +59,7 @@ struct ChatHistoryView: View {
 }
 
 #Preview {
-    ChatHistoryView(document: DoChatStudioDocument(), llm: LLM(from: "")!)
+    ChatHistoryView(document: DoChatStudioDocument(text: "Chat"), llm: LLM(from: "")!)
 }
 
 // A view that lays out the color swatches in a grid

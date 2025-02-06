@@ -8,7 +8,8 @@ import SwiftUI
 import FlexView
 
 struct ContentView: View {
-    
+    @Environment(\.colorScheme) var colorScheme
+
     @ObservedObject var document: DoChatStudioDocument
     @State private var ratio: CGFloat = 0.5
     @State private var childRatio: CGFloat = 0.5
@@ -16,7 +17,21 @@ struct ContentView: View {
     
     
     var body: some View {
-        VStack{
+        HStack{
+            Spacer(minLength: 0)
+            if document.url != nil && document.llm == nil {
+                VStack {
+                    Spacer()
+                    Group {
+                        Text("Model is Loading...")
+                        ProgressView()
+                            .progressViewStyle(CircularProgressViewStyle(tint: .accentColor))
+                    }
+//                        .scaleEffect(2.0, anchor: .center) // Makes the s pinner
+                    Spacer()
+                }
+            }
+            
             if document.url == nil {
                 SelectModelView(document: document)
             }
@@ -53,13 +68,16 @@ struct ContentView: View {
                     .padding()
                 }
             }
+            Spacer(minLength: 0)
         }
+        .background(colorScheme == .dark ? .brown.opacity(0.25) : .brown.opacity(0.25) )
+        .blendMode(.normal/*.luminosity*/)
     }
 }
 
 
 #Preview {
-    ContentView(document: DoChatStudioDocument())
+    ContentView(document: DoChatStudioDocument(text: "Chat"))
 }
 
 

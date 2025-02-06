@@ -42,6 +42,9 @@ class DoChatStudioDocument: FileDocument, Codable, ObservableObject/*, LLMOutput
         }
     }
     
+    var isLoaded: Bool = false
+    var isLoadedingModel: Bool = false
+    
     var id: UUID
     
     enum CodingKeys: String, CodingKey {
@@ -51,13 +54,16 @@ class DoChatStudioDocument: FileDocument, Codable, ObservableObject/*, LLMOutput
         case history
     }
     
-    init(text: String = "I'm a helpful chatbot with a personality like a computer from a tv scifi show, efficient and curt, but not rude.") {
+    init(text: String) {
         self.systemPrompt = text
         id = UUID()
+        
+        print("url0:\(url)")
         
         DispatchQueue.global(qos: .default).async {
             self.initLLM()
         }
+        
     }
     
     static var readableContentTypes: [UTType] { [.doChatStudio] }
@@ -73,8 +79,12 @@ class DoChatStudioDocument: FileDocument, Codable, ObservableObject/*, LLMOutput
         self.id = UUID()
         self.history = decodedDocument.history
         
-        self.initLLM(path: self.url)
-        print("initllm14")
+        print("doc1:\(decodedDocument)")
+        print("url1:\(url)")
+        
+        DispatchQueue.global(qos: .default).async {
+            self.initLLM()
+        }
     }
     
     required init(from decoder: any Decoder) throws {
@@ -84,10 +94,13 @@ class DoChatStudioDocument: FileDocument, Codable, ObservableObject/*, LLMOutput
         self.id = UUID()
         self.history = try container.decode([Chat].self, forKey: .history)
         
-        self.initLLM(path: self.url)
-        print("initllm15")
+        print("doc2:\(container)")
+        print("url2:\(self.url)")
+                
+        DispatchQueue.global(qos: .default).async {
+            self.initLLM()
+        }
     }
-    
     
     func encode(to encoder: any Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
@@ -112,103 +125,129 @@ class DoChatStudioDocument: FileDocument, Codable, ObservableObject/*, LLMOutput
     
     func initLLM(path: URL? = nil) {
         //        objectWillChange.send()
+        if isLoadedingModel {return}
+        print("isLoaded: \(isLoaded)")
+        print("URL: \(url)")
+        print("path: \(path)")
+        if isLoaded { return }
+        
         llm = nil
         
-        
-        url = path
+        if path != nil {
+            url = path
+        }
         
         if url == nil {
             urlExists = false
+            self.isLoaded = false
+            print("Load Exit")
             return
         }
         print(".......................................................................................")
         print("DoChat LLLM Init Start \nURL:\(url?.path() ?? "Path N/A")")
         print(".......................................................................................")
         
-        //        if ((url?.startAccessingSecurityScopedResource()) != nil) {
-        
-        do {
-            let result = try Data(contentsOf: url!)
-            print("URL Load Results:\(result)")
-            urlExists = true
-            //                objectWillChange.send()
-        } catch {
-            print("URL Load Error:\(error)")
-            urlExists = false
-            if !urlLoadError {
-                urlLoadError = true
-                initLLM(path: nil)
-                print("initllm16")
-            }
-        }
-        
-        if !urlExists {
-            print("URL does not exist")
+        if isLoadedingModel {return}
+
+        if ((url?.startAccessingSecurityScopedResource()) != nil) {
             
-            self.llm = nil
-            
-            //                url?.stopAccessingSecurityScopedResource()
-            
-            return
-        }
-        print(".......................................................................................")
-        
-        
-        DispatchQueue.main.async {
-            if let llm = LLM.init(from: self.url!, template: .customJinja(self.systemPrompt)) {
-                self.urlExists = true
-                llm.history.append(contentsOf: self.history)
+            do {
+                let result = try Data(contentsOf: url!)
+                print("URL Load Results:\(result)")
                 
-                //                self.llm?.delegate = self
-                llm.modelName = llm.model.name ?? ""
-                llm.modelArchitecture = llm.model.architecture ?? ""
-                llm.modelAuthor = llm.model.author ?? ""
-                llm.modelQuantizationType = llm.model.quantizationType ?? ""
-                
-                print("Model \(llm.modelName)")
-                print("Info: \(llm.systemInfo())")
-                print("DoChat initialized successfully: @ \n URL:\(self.url!.absoluteString) \n Author:\(llm.modelAuthor) \r Architecture:\(llm.modelArchitecture) \t Quantization Type:\(llm.modelQuantizationType)")
-                
-                //                url?.stopAccessingSecurityScopedResource()
-                
-                self.objectWillChange.send()
-                self.llm = llm
-                
-                
-                
-                return
-            }
-            
-            if self.llm == nil {print("Model Not Loaded")}
-            
-            //            url?.stopAccessingSecurityScopedResource()
-        }
-        
-    }
-    
-    
-    func respond(input: String) -> Void {
-        
-        if llm?.isThinking == false {
-            llm?.isThinking = true
-            llm?.shouldPausePredicting = false
-            
-            DispatchQueue.main.async { [self] in
-                history.append(Chat(role: .user, content: input))
-            }
-            
-            Task  {
-                await llm?.respond(to: input)
-                
-                DispatchQueue.main.async { [self] in
-                    let chat = Chat(role: .bot, content: llm?.output ?? "")
-                    history.append(chat)
-                    llm?.isThinking = false
+                urlExists = true
+            } catch {
+                print("URL Load Error:\(error)")
+                urlExists = false
+                if !urlLoadError {
+                    urlLoadError = true
+                    initLLM(path: nil)
+
+                    print("initllm16")
                 }
             }
             
+            if !urlExists {
+                print("URL does not exist")
+                self.isLoaded = false
+                self.llm = nil
+                url?.stopAccessingSecurityScopedResource()
+                self.isLoadedingModel = false
+                return
+            }
+            print("..........................................3............................................")
+            
+            
+            DispatchQueue.main.async {
+                if self.isLoadedingModel {return}
+                self.isLoadedingModel = true
+                if let llm = LLM.init(from: self.url!, template: .customJinja(self.systemPrompt)) {
+                    self.urlExists = true
+                    llm.history.append(contentsOf: self.history)
+                    
+                    llm.modelName = llm.model.name ?? ""
+                    llm.modelArchitecture = llm.model.architecture ?? ""
+                    llm.modelAuthor = llm.model.author ?? ""
+                    llm.modelQuantizationType = llm.model.quantizationType ?? ""
+                    
+                    print("Model \(llm.modelName)")
+                    print("Info: \(llm.systemInfo())")
+                    print("DoChat initialized successfully: @ \n URL:\(self.url!.absoluteString) \n Author:\(llm.modelAuthor) \r Architecture:\(llm.modelArchitecture) \t Quantization Type:\(llm.modelQuantizationType)")
+                    
+                    self.objectWillChange.send()
+                    self.llm = llm
+                    self.isLoaded = true
+                    
+                    self.url?.stopAccessingSecurityScopedResource()
+                    self.isLoadedingModel = false
+
+                    return
+                }
+                
+                if self.llm == nil {
+                    print("Model Not Loaded")
+                    self.isLoaded = false
+                    self.isLoadedingModel = false
+                }
+                
+                
+                
+            }
+            url?.stopAccessingSecurityScopedResource()
+            self.isLoadedingModel = false
+
+        }
+    }
+    
+    func respond(input: String) -> Void {
+        // Ensure we have a valid model instance.
+        //        guard let llm = llm else { return }
+        
+        if !(llm?.isThinking ?? false) {
+            // Model is not running: start generation.
+            llm?.isThinking = true
+            llm?.shouldPausePredicting = false
+            
+            // Append the user's chat to history on the main queue.
+            DispatchQueue.main.async { [weak self] in
+                self?.history.append(Chat(role: .user, content: input))
+            }
+            
+            // Start the async generation task.
+            Task {
+                await llm?.respond(to: input)
+                DispatchQueue.main.async { [weak self] in
+                    // After generation completes, append the bot's response.
+                    if let self = self {
+                        let chat = Chat(role: .bot, content: llm?.output ?? "")
+                        self.history.append(chat)
+                        llm?.isThinking = false
+                    }
+                }
+            }
         } else {
-            llm?.shouldPausePredicting = true
+            // Model is already generating; toggle pause/resume.
+            llm?.shouldPausePredicting.toggle()
         }
     }
     
@@ -217,18 +256,3 @@ class DoChatStudioDocument: FileDocument, Codable, ObservableObject/*, LLMOutput
     }
     
 }
-
-//func stringFromFILE(filePtr: UnsafeMutablePointer<FILE>) -> String {
-//    guard filePtr != nil else {
-//      return ""
-//    }
-//    // change the buffer size at your needs
-//    let buffer = [CChar](repeating: 0, count: 1024)
-//    var string = String()
-//    while fgets(UnsafeMutablePointer(mutating: buffer), Int32(buffer.count), filePtr) != nil {
-//      if let read = String.fromCString(buffer) {
-//        string += read
-//      }
-//    }
-//    return string
-//  }

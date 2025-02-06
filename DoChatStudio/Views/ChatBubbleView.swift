@@ -11,7 +11,7 @@ struct ChatBubbleView: View {
     
     var body: some View {
         let chatBackgroundColor = chat.role == .user ?  customGradient(Color.blue.opacity(0.2)) : chat.ignored ? customGradient(Color.orange.opacity(0.125)) : customGradient(Color.green.opacity(0.2))
-
+        
         HStack{
             if chat.role == .user {Spacer(minLength: 25)}
             VStack(alignment: .leading) {
@@ -20,16 +20,23 @@ struct ChatBubbleView: View {
                 }
                 
                 HStack{
-                    if let llmState = chat.llmState {
-                        switch llmState {
-                        case .preparing, .thinking, .generating, .finishing, .stopped, .paused, .error:
-                            Text(llmState.rawValue).monospaced()
-                                .padding()
-                        default:
-                            EmptyView()
+                    HStack{
+                        if let llmState = chat.llmState {
+                            switch llmState {
+                            case .preparing, .thinking, .generating, .finishing, .stopped, .paused, .error:
+                                Text(llmState.rawValue)
+                                    .monospaced()
+                                    .fontWeight(.medium)
+                                    .foregroundColor(.black)
+                                    .padding(6)
+                            default:
+                                EmptyView()
+                            }
                         }
                     }
                 }
+                .background(RoundedRectangle(cornerRadius: 4).fill(customGradient(Color.green.opacity(0.5))).strokeBorder(Color.black, lineWidth: 1))
+                .shadow(radius:1.0)
             }
             .background(
                 RoundedRectangle(cornerRadius: 8)
@@ -64,7 +71,7 @@ struct ColorSwatch: View {
                 .fill(color)
                 .frame(width: 100, height: 100)
                 .cornerRadius(8)
-                // Adding a subtle border to distinguish light colors
+            // Adding a subtle border to distinguish light colors
                 .overlay(
                     RoundedRectangle(cornerRadius: 8)
                         .stroke(Color.black.opacity(0.1), lineWidth: 1)

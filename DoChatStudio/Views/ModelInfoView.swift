@@ -44,5 +44,5 @@ struct ModelInfoView: View {
 }
 
 #Preview {
-    ModelInfoView(document: DoChatStudioDocument(), llm: LLM(from: "")!)
+    ModelInfoView(document: DoChatStudioDocument(text: "Chat"), llm: LLM(from: "")!)
 }
