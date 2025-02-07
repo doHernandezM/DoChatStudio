@@ -3,6 +3,7 @@
 //
 //  Created by Cosas on 1/28/25.
 //
+
 import Foundation
 import llama
 
@@ -90,8 +91,6 @@ extension Model {
         return getModelMetadata(for: "general.name")
     }
     
-    
-   
     // Get model architecture (e.g., "LLaMA", "Mistral")
     public var architecture: String? {
         return getModelMetadata(for: "general.architecture")

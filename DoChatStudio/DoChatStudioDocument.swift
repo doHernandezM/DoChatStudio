@@ -2,257 +2,282 @@
 //  DoChatStudio
 //
 //  Created by Cosas on 1/28/25.
-//
 
 import SwiftUI
 import UniformTypeIdentifiers
 
 extension UTType {
     static var doChatStudio: UTType {
-        UTType(importedAs: "net.example.doChatStudio.document")
+        UTType(importedAs: "net.example.dochatstudio.document")
     }
     static var GGMLUniversalFile: UTType {
-        UTType(importedAs: "net.example.doChatStudio.gguf")
+        UTType(importedAs: "net.example.dochatstudio.gguf")
     }
 }
 
-class DoChatStudioDocument: FileDocument, Codable, ObservableObject/*, LLMOutputDelegate*/ {
-    //    @Published var rawOutputString: String = ""
-    
-    
-    @Published var url: URL? = nil  {
-        willSet {
-            objectWillChange.send()
-        }
+class DoChatStudioDocument: FileDocument, ObservableObject {
+    // MARK: - Published Properties
+    @Published var url: URL? = nil {
+        willSet { objectWillChange.send() }
     }
     @Published var urlExists: Bool = false
     var urlLoadError: Bool = false
-    
     @Published var systemPrompt: String
-    
     @Published var llm: LLM? = nil {
-        willSet {
-            objectWillChange.send()
-        }
+        willSet { objectWillChange.send() }
     }
-    
     @Published var history: [Chat] = [] {
-        willSet {
-            objectWillChange.send()
-        }
+        willSet { objectWillChange.send() }
     }
     
+    // MARK: - Other Properties
     var isLoaded: Bool = false
-    var isLoadedingModel: Bool = false
-    
     var id: UUID
+
+    // Specify the document type.
+    static var readableContentTypes: [UTType] { [.doChatStudio] }
     
-    enum CodingKeys: String, CodingKey {
-        case url
-        case systemPrompt
-        case id
-        case history
+    // MARK: - Helper Struct for JSON Coding
+    private struct DocumentData: Codable {
+        var url: URL?
+        var systemPrompt: String
+        var history: [Chat]
     }
     
+    // MARK: - Initializers
+    
+    /// Creates a new document with the given system prompt.
     init(text: String) {
         self.systemPrompt = text
-        id = UUID()
+        self.id = UUID()
         
-        print("url0:\(url)")
-        
+        // For new documents you may want to set url later.
         DispatchQueue.global(qos: .default).async {
             self.initLLM()
         }
-        
     }
     
-    static var readableContentTypes: [UTType] { [.doChatStudio] }
-    
+    /// Initializes the document from the file’s JSON data.
     required init(configuration: ReadConfiguration) throws {
         guard let data = configuration.file.regularFileContents else {
             throw CocoaError(.fileReadCorruptFile)
         }
         
-        let decodedDocument = try JSONDecoder().decode(DoChatStudioDocument.self, from: data)
-        self.url = decodedDocument.url
-        self.systemPrompt = decodedDocument.systemPrompt
-        self.id = UUID()
-        self.history = decodedDocument.history
+        // Decode the JSON into our helper struct.
+        let decoded = try JSONDecoder().decode(DocumentData.self, from: data)
+        self.url = decoded.url
+        self.systemPrompt = decoded.systemPrompt
+        self.history = decoded.history
+        self.id = UUID()  // Create a new UUID or decode one if needed.
         
-        print("doc1:\(decodedDocument)")
-        print("url1:\(url)")
-        
-        DispatchQueue.global(qos: .default).async {
-            self.initLLM()
-        }
-    }
-    
-    required init(from decoder: any Decoder) throws {
-        let container = try decoder.container(keyedBy: CodingKeys.self)
-        self.url = try container.decode(URL.self, forKey: .url)
-        self.systemPrompt = try container.decode(String.self, forKey: .systemPrompt)
-        self.id = UUID()
-        self.history = try container.decode([Chat].self, forKey: .history)
-        
-        print("doc2:\(container)")
-        print("url2:\(self.url)")
-                
-        DispatchQueue.global(qos: .default).async {
-            self.initLLM()
-        }
-    }
-    
-    func encode(to encoder: any Encoder) throws {
-        var container = encoder.container(keyedBy: CodingKeys.self)
-        try container.encode(url, forKey: .url)
-        try container.encode(systemPrompt, forKey: .systemPrompt)
-        try container.encode(id, forKey: .id)
-        try container.encode(history, forKey: .history)
-    }
-    
-    func decode(from decoder: any Decoder) throws {
-        let container = try decoder.container(keyedBy: CodingKeys.self)
-        url = try container.decode(URL.self, forKey: .url)
-        systemPrompt = try container.decode(String.self, forKey: .systemPrompt)
-        id = try container.decode(UUID.self, forKey: .id)
-        history = try container.decode([Chat].self, forKey: .history)
-    }
-    
-    func fileWrapper(configuration: WriteConfiguration) throws -> FileWrapper {
-        let data = try JSONEncoder().encode(self)
-        return FileWrapper(regularFileWithContents: data)
-    }
-    
-    func initLLM(path: URL? = nil) {
-        //        objectWillChange.send()
-        if isLoadedingModel {return}
-        print("isLoaded: \(isLoaded)")
-        print("URL: \(url)")
-        print("path: \(path)")
-        if isLoaded { return }
-        
-        llm = nil
-        
-        if path != nil {
-            url = path
-        }
-        
-        if url == nil {
-            urlExists = false
-            self.isLoaded = false
-            print("Load Exit")
-            return
-        }
-        print(".......................................................................................")
-        print("DoChat LLLM Init Start \nURL:\(url?.path() ?? "Path N/A")")
-        print(".......................................................................................")
-        
-        if isLoadedingModel {return}
-
-        if ((url?.startAccessingSecurityScopedResource()) != nil) {
-            
-            do {
-                let result = try Data(contentsOf: url!)
-                print("URL Load Results:\(result)")
-                
-                urlExists = true
-            } catch {
-                print("URL Load Error:\(error)")
-                urlExists = false
-                if !urlLoadError {
-                    urlLoadError = true
-                    initLLM(path: nil)
-
-                    print("initllm16")
-                }
-            }
-            
-            if !urlExists {
-                print("URL does not exist")
-                self.isLoaded = false
-                self.llm = nil
-                url?.stopAccessingSecurityScopedResource()
-                self.isLoadedingModel = false
+        // **** Synchronously update self.url if it’s external ****
+        // This ensures that the file URL stored in the document is a sandboxed copy.
+        if let originalURL = self.url {
+            let fileManager = FileManager.default
+            guard let documentsURL = try? fileManager.url(
+                for: .documentDirectory,
+                in: .userDomainMask,
+                appropriateFor: nil,
+                create: false
+            ) else {
+                print("Could not find Documents directory.")
                 return
             }
-            print("..........................................3............................................")
+            let filePath = originalURL.path
+            let docsPath = documentsURL.path
+            let isInsideAppSandbox = filePath.hasPrefix(docsPath)
             
-            
-            DispatchQueue.main.async {
-                if self.isLoadedingModel {return}
-                self.isLoadedingModel = true
-                if let llm = LLM.init(from: self.url!, template: .customJinja(self.systemPrompt)) {
-                    self.urlExists = true
-                    llm.history.append(contentsOf: self.history)
-                    
-                    llm.modelName = llm.model.name ?? ""
-                    llm.modelArchitecture = llm.model.architecture ?? ""
-                    llm.modelAuthor = llm.model.author ?? ""
-                    llm.modelQuantizationType = llm.model.quantizationType ?? ""
-                    
-                    print("Model \(llm.modelName)")
-                    print("Info: \(llm.systemInfo())")
-                    print("DoChat initialized successfully: @ \n URL:\(self.url!.absoluteString) \n Author:\(llm.modelAuthor) \r Architecture:\(llm.modelArchitecture) \t Quantization Type:\(llm.modelQuantizationType)")
-                    
-                    self.objectWillChange.send()
-                    self.llm = llm
-                    self.isLoaded = true
-                    
-                    self.url?.stopAccessingSecurityScopedResource()
-                    self.isLoadedingModel = false
-
-                    return
-                }
-                
-                if self.llm == nil {
-                    print("Model Not Loaded")
-                    self.isLoaded = false
-                    self.isLoadedingModel = false
-                }
-                
-                
-                
-            }
-            url?.stopAccessingSecurityScopedResource()
-            self.isLoadedingModel = false
-
-        }
-    }
-    
-    func respond(input: String) -> Void {
-        // Ensure we have a valid model instance.
-        //        guard let llm = llm else { return }
-        
-        if !(llm?.isThinking ?? false) {
-            // Model is not running: start generation.
-            llm?.isThinking = true
-            llm?.shouldPausePredicting = false
-            
-            // Append the user's chat to history on the main queue.
-            DispatchQueue.main.async { [weak self] in
-                self?.history.append(Chat(role: .user, content: input))
+            // Create a "Models" subfolder in the Documents directory.
+            let localDirectory = documentsURL.appendingPathComponent("Models")
+            do {
+                try fileManager.createDirectory(at: localDirectory, withIntermediateDirectories: true)
+            } catch {
+                print("Error creating local Models directory: \(error)")
             }
             
-            // Start the async generation task.
-            Task {
-                await llm?.respond(to: input)
-                DispatchQueue.main.async { [weak self] in
-                    // After generation completes, append the bot's response.
-                    if let self = self {
-                        let chat = Chat(role: .bot, content: llm?.output ?? "")
-                        self.history.append(chat)
-                        llm?.isThinking = false
+            // Destination URL is the local copy.
+            let destinationURL = localDirectory.appendingPathComponent(originalURL.lastPathComponent)
+            
+            // If the local copy does not already exist, copy the file.
+            if !fileManager.fileExists(atPath: destinationURL.path) {
+                if !isInsideAppSandbox {
+                    #if os(iOS)
+                    if originalURL.startAccessingSecurityScopedResource() {
+                        defer { originalURL.stopAccessingSecurityScopedResource() }
+                        do {
+                            try fileManager.copyItem(at: originalURL, to: destinationURL)
+                        } catch {
+                            print("Error copying file to local Models directory: \(error)")
+                        }
+                    } else {
+                        print("Unable to start accessing security scoped resource at \(originalURL)")
+                    }
+                    #else
+                    do {
+                        try fileManager.copyItem(at: originalURL, to: destinationURL)
+                    } catch {
+                        print("Error copying file to local Models directory: \(error)")
+                    }
+                    #endif
+                } else {
+                    do {
+                        try fileManager.copyItem(at: originalURL, to: destinationURL)
+                    } catch {
+                        print("Error copying file to local Models directory: \(error)")
                     }
                 }
             }
+            // Update self.url to point to the local copy.
+            self.url = destinationURL
+            print("Document URL updated to sandbox copy: \(self.url!)")
+        }
+        
+        // Now initialize the LLM asynchronously.
+        DispatchQueue.global(qos: .default).async {
+            self.initLLM()
+        }
+        
+        print("Initialized document with URL: \(self.url?.absoluteString ?? "nil")")
+    }
+    
+    /// Writes the document’s data as JSON.
+    func fileWrapper(configuration: WriteConfiguration) throws -> FileWrapper {
+        // Create an instance of the helper struct.
+        let documentData = DocumentData(url: self.url,
+                                        systemPrompt: self.systemPrompt,
+                                        history: self.history)
+        let data = try JSONEncoder().encode(documentData)
+        return FileWrapper(regularFileWithContents: data)
+    }
+    
+    // MARK: - Main LLM Initialization
+    func initLLM(path: URL? = nil) {
+        // If we've already loaded a model, no need to repeat.
+        if isLoaded { return }
+        print("Init")
+        // Reset any previously loaded LLM.
+        llm = nil
+
+        // Update `url` if a new path is provided.
+        if let path = path {
+            url = path
+        }
+        
+        guard let fileURL = url else {
+            urlExists = false
+            isLoaded = false
+            print("Load Exit: URL is nil")
+            return
+        }
+        
+        let fileManager = FileManager.default
+        // Get the app’s Documents directory for sandboxed file storage.
+        guard let documentsURL = try? fileManager.url(
+            for: .documentDirectory,
+            in: .userDomainMask,
+            appropriateFor: nil,
+            create: false
+        ) else {
+            print("Could not find Documents directory.")
+            return
+        }
+        
+        // Check if the file is already inside the app’s sandbox.
+        let filePath = fileURL.path
+        let docsPath = documentsURL.path
+        let isInsideAppSandbox = filePath.hasPrefix(docsPath)
+        
+        // Create a "Models" subfolder in the Documents directory.
+        let localDirectory = documentsURL.appendingPathComponent("Models")
+        do {
+            try fileManager.createDirectory(at: localDirectory,
+                                            withIntermediateDirectories: true)
+        } catch {
+            print("Error creating local Models directory: \(error)")
+            return
+        }
+        
+        // Destination URL is the local copy.
+        let destinationURL = localDirectory.appendingPathComponent(fileURL.lastPathComponent)
+        
+        // If the local copy does not already exist, copy the file.
+        if !fileManager.fileExists(atPath: destinationURL.path) {
+            if !isInsideAppSandbox {
+                #if os(iOS)
+                guard fileURL.startAccessingSecurityScopedResource() else {
+                    print("Unable to start accessing security-scoped resource at \(fileURL)")
+                    return
+                }
+                defer { fileURL.stopAccessingSecurityScopedResource() }
+                #endif
+                do {
+                    try fileManager.copyItem(at: fileURL, to: destinationURL)
+                } catch {
+                    print("Error copying file to Documents/Models: \(error)")
+                    return
+                }
+            } else {
+                do {
+                    try fileManager.copyItem(at: fileURL, to: destinationURL)
+                } catch {
+                    print("Error copying file to Documents/Models: \(error)")
+                    return
+                }
+            }
+        }
+        
+        // Update the document’s URL to point to the local copy.
+        self.url = destinationURL
+        
+        // Load the LLM from the local copy on the main thread.
+        DispatchQueue.main.async {
+            if let llmInstance = LLM.init(from: self.url!,
+                                          template: .customJinja(self.systemPrompt)) {
+                self.urlExists = true
+                llmInstance.history.append(contentsOf: self.history)
+                
+                llmInstance.modelName = llmInstance.model.name ?? ""
+                llmInstance.modelArchitecture = llmInstance.model.architecture ?? ""
+                llmInstance.modelAuthor = llmInstance.model.author ?? ""
+                llmInstance.modelQuantizationType = llmInstance.model.quantizationType ?? ""
+                
+                print("Model \(llmInstance.modelName) initialized successfully from \(self.url!)")
+                self.llm = llmInstance
+                self.isLoaded = true
+            } else {
+                print("Model Not Loaded from \(self.url!)")
+                self.isLoaded = false
+            }
+        }
+    }
+    
+    // MARK: - Respond / Chat Logic
+    func respond(input: String) {
+        guard let llm = llm else { return }
+        if !llm.isThinking {
+            llm.isThinking = true
+            llm.shouldPausePredicting = false
+            
+            // Add the user's message to the history
+            DispatchQueue.main.async {
+                self.history.append(Chat(role: .user, content: input))
+            }
+            
+            // Run the actual LLM inference
+            Task {
+                await llm.respond(to: input)
+                DispatchQueue.main.async {
+                    let botMessage = Chat(role: .bot, content: self.llm?.output ?? "")
+                    self.history.append(botMessage)
+                    self.llm?.isThinking = false
+                }
+            }
         } else {
-            // Model is already generating; toggle pause/resume.
-            llm?.shouldPausePredicting.toggle()
+            llm.shouldPausePredicting.toggle()
         }
     }
     
     func stop() {
         llm?.stop()
     }
-    
 }

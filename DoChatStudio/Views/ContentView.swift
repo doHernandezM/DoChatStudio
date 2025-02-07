@@ -9,12 +9,16 @@ import FlexView
 
 struct ContentView: View {
     @Environment(\.colorScheme) var colorScheme
-
+    
     @ObservedObject var document: DoChatStudioDocument
     @State private var ratio: CGFloat = 0.5
     @State private var childRatio: CGFloat = 0.5
     @State private var isDragging: Bool = false
-    
+#if os(iOS)
+    @State var oniPhone: Bool = UIDevice.current.userInterfaceIdiom == .phone
+#elseif os(macOS)
+    let oniPhone: Bool = false
+#endif
     
     var body: some View {
         HStack{
@@ -27,7 +31,7 @@ struct ContentView: View {
                         ProgressView()
                             .progressViewStyle(CircularProgressViewStyle(tint: .accentColor))
                     }
-//                        .scaleEffect(2.0, anchor: .center) // Makes the s pinner
+                    //                        .scaleEffect(2.0, anchor: .center) // Makes the s pinner
                     Spacer()
                 }
             }
@@ -38,34 +42,53 @@ struct ContentView: View {
             
             if  document.llm != nil {
                 Group {
-                    FlexView(
-                        children: [
-                            {
-                                AnyView(ModelInfoView(document: document, llm: document.llm!))
-                            }(),
-                            {if let _ = document.llm {
-                                return AnyView(ModelAdjustmentView(document: document, llm: document.llm!))
+                    if oniPhone {
+#if os(iOS)
+                        TabView {
+                            if let _ = document.llm {
+                                VStack {
+                                    ModelInfoView(document: document, llm: document.llm!)
+                                    ModelAdjustmentView(document: document, llm: document.llm!)
+                                }
+                                ChatHistoryView(document: document, llm: document.llm!)
+                                    .padding()
+                                
                             } else {
-                                return AnyView(ErrorView(errorString: "No Model Selected"))
-                            }}(),
-                            {if let _ = document.llm {
-                                return AnyView(ChatHistoryView(document: document, llm: document.llm!))
-                            } else {
-                                return AnyView(ErrorView(errorString: "No Model Selected"))
-                            }}(),
-                        ],
-                        ratio: $ratio,
-                        childRatio: $childRatio,
-                        isDragging: $isDragging,
-                        configuration: FlexView.Configuration(
-                            splitDirection: .horizontal,
-                            innerPadding: 5.0,
-                            showsCrosshair: true,
-                            crosshairView: crosshairView(),
-                            secondaryOrientation: true
+                                ErrorView(errorString: "No Model Selected")
+                            }
+                        }
+                        .tabViewStyle(.page)
+#endif
+                    } else {
+                        FlexView(
+                            children: [
+                                {
+                                    AnyView(ModelInfoView(document: document, llm: document.llm!))
+                                }(),
+                                {if let _ = document.llm {
+                                    return AnyView(ModelAdjustmentView(document: document, llm: document.llm!))
+                                } else {
+                                    return AnyView(ErrorView(errorString: "No Model Selected"))
+                                }}(),
+                                {if let _ = document.llm {
+                                    return AnyView(ChatHistoryView(document: document, llm: document.llm!))
+                                } else {
+                                    return AnyView(ErrorView(errorString: "No Model Selected"))
+                                }}(),
+                            ],
+                            ratio: $ratio,
+                            childRatio: $childRatio,
+                            isDragging: $isDragging,
+                            configuration: FlexView.Configuration(
+                                splitDirection: .horizontal,
+                                innerPadding: 5.0,
+                                showsCrosshair: true,
+                                crosshairView: crosshairView(),
+                                secondaryOrientation: true
+                            )
                         )
-                    )
-                    .padding()
+                        .padding()
+                    }
                 }
             }
             Spacer(minLength: 0)
