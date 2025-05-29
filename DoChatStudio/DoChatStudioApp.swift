@@ -6,11 +6,20 @@
 //
 
 import SwiftUI
+import Combine
 
+    
 @main
 struct DoChatStudioApp: App {
-    @Environment(\.colorScheme) var colorScheme
 
+//    @Environment(\.colorScheme) var colorScheme
+    
+    init() {
+        
+        
+        
+    }
+    
     var body: some Scene {
         DocumentGroup(newDocument: DoChatStudioDocument(text: "")) { file in
             Group {

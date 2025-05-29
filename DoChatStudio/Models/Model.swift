@@ -105,4 +105,11 @@ extension Model {
     public var quantizationType: String? {
         return getModelMetadata(for: "general.quantization_type")
     }
+    
+    // Get model size
+    public var size: String? {
+        return getModelMetadata(for: "general.quantization_type")
+    }
+    
+    
 }

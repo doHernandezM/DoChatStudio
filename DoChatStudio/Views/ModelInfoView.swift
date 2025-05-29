@@ -14,10 +14,7 @@ struct ModelInfoView: View {
     
     
     var body: some View {
-        ScrollView(.vertical){
             VStack(alignment: .leading) {
-                SelectModelView(document: document)
-                
                 VStack(alignment: .leading) {
                     Text("Name: \(llm.modelName )")
                 }
@@ -30,15 +27,12 @@ struct ModelInfoView: View {
                 VStack(alignment: .leading) {
                     Text("Path: \(document.url?.absoluteString ?? "")")
                 }
-                VStack(alignment: .leading) {
-                    Text("hparams: \(llm.systemInfo())")
-                }
+//                VStack(alignment: .leading) {
+//                    Text("hparams: \(llm.systemInfo())")
+//                }
                 Spacer()
             }
             .padding()
-        }
-        .background(.black.opacity(0.075))
-        .cornerRadius(10.0)
 
     }
 }

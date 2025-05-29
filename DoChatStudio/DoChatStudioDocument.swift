@@ -6,15 +6,6 @@
 import SwiftUI
 import UniformTypeIdentifiers
 
-extension UTType {
-    static var doChatStudio: UTType {
-        UTType(importedAs: "net.example.dochatstudio.document")
-    }
-    static var GGMLUniversalFile: UTType {
-        UTType(importedAs: "net.example.dochatstudio.gguf")
-    }
-}
-
 class DoChatStudioDocument: FileDocument, ObservableObject {
     // MARK: - Published Properties
     @Published var url: URL? = nil {
@@ -30,6 +21,11 @@ class DoChatStudioDocument: FileDocument, ObservableObject {
         willSet { objectWillChange.send() }
     }
     
+    @Published var locked: Bool = false
+    @Published var password: Bool = false
+    
+    @Published var resetSeedAfterResponse: Bool = false
+    
     // MARK: - Other Properties
     var isLoaded: Bool = false
     var id: UUID
@@ -42,6 +38,13 @@ class DoChatStudioDocument: FileDocument, ObservableObject {
         var url: URL?
         var systemPrompt: String
         var history: [Chat]
+        
+        var locked: Bool
+        var password: Bool
+        
+        var resetSeedAfterResponse: Bool
+        
+        var id: UUID
     }
     
     // MARK: - Initializers
@@ -53,7 +56,7 @@ class DoChatStudioDocument: FileDocument, ObservableObject {
         
         // For new documents you may want to set url later.
         DispatchQueue.global(qos: .default).async {
-            self.initLLM()
+//            self.initLLM()
         }
     }
     
@@ -68,76 +71,31 @@ class DoChatStudioDocument: FileDocument, ObservableObject {
         self.url = decoded.url
         self.systemPrompt = decoded.systemPrompt
         self.history = decoded.history
-        self.id = UUID()  // Create a new UUID or decode one if needed.
         
-        // **** Synchronously update self.url if it’s external ****
-        // This ensures that the file URL stored in the document is a sandboxed copy.
-        if let originalURL = self.url {
-            let fileManager = FileManager.default
-            guard let documentsURL = try? fileManager.url(
-                for: .documentDirectory,
-                in: .userDomainMask,
-                appropriateFor: nil,
-                create: false
-            ) else {
-                print("Could not find Documents directory.")
-                return
-            }
-            let filePath = originalURL.path
-            let docsPath = documentsURL.path
-            let isInsideAppSandbox = filePath.hasPrefix(docsPath)
-            
-            // Create a "Models" subfolder in the Documents directory.
-            let localDirectory = documentsURL.appendingPathComponent("Models")
-            do {
-                try fileManager.createDirectory(at: localDirectory, withIntermediateDirectories: true)
-            } catch {
-                print("Error creating local Models directory: \(error)")
-            }
-            
-            // Destination URL is the local copy.
-            let destinationURL = localDirectory.appendingPathComponent(originalURL.lastPathComponent)
-            
-            // If the local copy does not already exist, copy the file.
-            if !fileManager.fileExists(atPath: destinationURL.path) {
-                if !isInsideAppSandbox {
-                    #if os(iOS)
-                    if originalURL.startAccessingSecurityScopedResource() {
-                        defer { originalURL.stopAccessingSecurityScopedResource() }
-                        do {
-                            try fileManager.copyItem(at: originalURL, to: destinationURL)
-                        } catch {
-                            print("Error copying file to local Models directory: \(error)")
-                        }
-                    } else {
-                        print("Unable to start accessing security scoped resource at \(originalURL)")
-                    }
-                    #else
-                    do {
-                        try fileManager.copyItem(at: originalURL, to: destinationURL)
-                    } catch {
-                        print("Error copying file to local Models directory: \(error)")
-                    }
-                    #endif
-                } else {
-                    do {
-                        try fileManager.copyItem(at: originalURL, to: destinationURL)
-                    } catch {
-                        print("Error copying file to local Models directory: \(error)")
-                    }
-                }
-            }
-            // Update self.url to point to the local copy.
-            self.url = destinationURL
-            print("Document URL updated to sandbox copy: \(self.url!)")
-        }
+        self.locked = decoded.locked
+        self.password = decoded.password
+        
+        self.resetSeedAfterResponse = decoded.resetSeedAfterResponse
+        
+        self.id = UUID()  // Create a new UUID or decode one if needed.
+        if self.url == nil {return}
+        
+        
+        print("Document URL updated to sandbox copy: \(self.url!)")
+        
         
         // Now initialize the LLM asynchronously.
-        DispatchQueue.global(qos: .default).async {
-            self.initLLM()
+        if let theURL = self.url {
+            if FileManager.default.fileExists(atPath: theURL.path) {
+                DispatchQueue.global(qos: .default).async {
+                    print("theUrl: \(theURL.absoluteString)")
+                    self.initLLM(path: theURL)
+                }
+                
+                print("Initialized document with URL: \(theURL.absoluteString)")
+            }
         }
         
-        print("Initialized document with URL: \(self.url?.absoluteString ?? "nil")")
     }
     
     /// Writes the document’s data as JSON.
@@ -145,89 +103,19 @@ class DoChatStudioDocument: FileDocument, ObservableObject {
         // Create an instance of the helper struct.
         let documentData = DocumentData(url: self.url,
                                         systemPrompt: self.systemPrompt,
-                                        history: self.history)
+                                        history: self.history, locked: self.locked, password: self.password, resetSeedAfterResponse: self.resetSeedAfterResponse, id: self.id)
         let data = try JSONEncoder().encode(documentData)
         return FileWrapper(regularFileWithContents: data)
     }
     
     // MARK: - Main LLM Initialization
-    func initLLM(path: URL? = nil) {
-        // If we've already loaded a model, no need to repeat.
-        if isLoaded { return }
-        print("Init")
-        // Reset any previously loaded LLM.
+    @MainActor
+    func initLLM(path: URL) {
+        url = path
+        
         llm = nil
 
-        // Update `url` if a new path is provided.
-        if let path = path {
-            url = path
-        }
-        
-        guard let fileURL = url else {
-            urlExists = false
-            isLoaded = false
-            print("Load Exit: URL is nil")
-            return
-        }
-        
-        let fileManager = FileManager.default
-        // Get the app’s Documents directory for sandboxed file storage.
-        guard let documentsURL = try? fileManager.url(
-            for: .documentDirectory,
-            in: .userDomainMask,
-            appropriateFor: nil,
-            create: false
-        ) else {
-            print("Could not find Documents directory.")
-            return
-        }
-        
-        // Check if the file is already inside the app’s sandbox.
-        let filePath = fileURL.path
-        let docsPath = documentsURL.path
-        let isInsideAppSandbox = filePath.hasPrefix(docsPath)
-        
-        // Create a "Models" subfolder in the Documents directory.
-        let localDirectory = documentsURL.appendingPathComponent("Models")
-        do {
-            try fileManager.createDirectory(at: localDirectory,
-                                            withIntermediateDirectories: true)
-        } catch {
-            print("Error creating local Models directory: \(error)")
-            return
-        }
-        
-        // Destination URL is the local copy.
-        let destinationURL = localDirectory.appendingPathComponent(fileURL.lastPathComponent)
-        
-        // If the local copy does not already exist, copy the file.
-        if !fileManager.fileExists(atPath: destinationURL.path) {
-            if !isInsideAppSandbox {
-                #if os(iOS)
-                guard fileURL.startAccessingSecurityScopedResource() else {
-                    print("Unable to start accessing security-scoped resource at \(fileURL)")
-                    return
-                }
-                defer { fileURL.stopAccessingSecurityScopedResource() }
-                #endif
-                do {
-                    try fileManager.copyItem(at: fileURL, to: destinationURL)
-                } catch {
-                    print("Error copying file to Documents/Models: \(error)")
-                    return
-                }
-            } else {
-                do {
-                    try fileManager.copyItem(at: fileURL, to: destinationURL)
-                } catch {
-                    print("Error copying file to Documents/Models: \(error)")
-                    return
-                }
-            }
-        }
-        
-        // Update the document’s URL to point to the local copy.
-        self.url = destinationURL
+        if url == nil {return}
         
         // Load the LLM from the local copy on the main thread.
         DispatchQueue.main.async {

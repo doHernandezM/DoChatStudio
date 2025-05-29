@@ -9,7 +9,6 @@
 import SwiftUI
 
 
-
 public struct Chat: Identifiable, Codable {
     public let id: UUID
     

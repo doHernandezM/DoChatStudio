@@ -9,6 +9,7 @@ import SwiftUI
 struct ChatHistoryView: View {
     @ObservedObject var document: DoChatStudioDocument
     @ObservedObject var llm: LLM
+    @Environment(\.colorScheme) var colorScheme
         
     @State var showX: Bool = false
     
@@ -48,7 +49,10 @@ struct ChatHistoryView: View {
             
         }
         .padding()
-        .background(Color.black.opacity(0.075)).cornerRadius(10)
+//        .background(Color.black.opacity(0.075)).cornerRadius(10)
+        .background(colorScheme == .dark ? .brown.opacity(0.25) : .brown.opacity(0.25) )
+        .blendMode(.normal/*.luminosity*/)
+        .cornerRadius(10)
     }
     
     private func scrollToBottom(_ proxy: ScrollViewProxy) {

@@ -134,7 +134,7 @@ open class LLM: ObservableObject {
     @Published public var topP: Float
     @Published public var temp: Float
     public var history: [Chat]
-    @Published public var historyLimit: Int
+    @Published public var historyLimit: Int32
     
     //    public weak var delegate: LLMOutputDelegate?
     
@@ -170,7 +170,7 @@ open class LLM: ObservableObject {
         topK: Int32 = 40,
         topP: Float = 0.95,
         temp: Float = 0.6,
-        historyLimit: Int = 8,
+        historyLimit: Int32 = 8,
         maxTokenCount: Int32 = 2048
     ) {
         self.path = path.cString(using: .utf8)!
@@ -222,7 +222,7 @@ open class LLM: ObservableObject {
         topK: Int32 = 40,
         topP: Float = 0.95,
         temp: Float = 0.8,
-        historyLimit: Int = 8,
+        historyLimit: Int32 = 8,
         maxTokenCount: Int32 = 2048
     ) {
         self.init(
@@ -247,7 +247,7 @@ open class LLM: ObservableObject {
         topK: Int32 = 40,
         topP: Float = 0.95,
         temp: Float = 0.6,
-        historyLimit: Int = 8,
+        historyLimit: Int32 = 8,
         maxTokenCount: Int32 = 2048,
         updateProgress: @escaping (Double) -> Void = { print(String(format: "downloaded(%.2f%%)", $0 * 100)) }
     ) async throws {
@@ -276,7 +276,7 @@ open class LLM: ObservableObject {
         topK: Int32 = 40,
         topP: Float = 0.95,
         temp: Float = 0.6,
-        historyLimit: Int = 8,
+        historyLimit: Int32 = 8,
         maxTokenCount: Int32 = 2048
     ) {
         self.init(
@@ -523,9 +523,13 @@ open class LLM: ObservableObject {
     }
     
     open func respond(to input: String) async {
+        let baseline = baselineMemoryInfo()
+        print("Baseline: \(baseline)\n\n")
+        
         await respond(to: input) { [self] response in
             await setOutput(to: "")
             for await responseDelta in response {
+//                print(String(format: "Current Memory Usage : %.02f GB\n\n", (Double(currentMemoryUsage()) / 1024.0 / 1024.0 / 1024.0)))
                 update(responseDelta)
                 await setOutput(to: output + responseDelta)
             }
@@ -549,7 +553,27 @@ open class LLM: ObservableObject {
     public func encode(_ text: borrowing String) -> [Token] {
         model.encode(text)
     }
+    
+    /// Returns baseline memory info: the model’s weight size (in bytes) and a system info string.
+    public func baselineMemoryInfo() -> (modelSize: UInt64, systemInfo: String?) {
+        // Convert the opaque pointer to an UnsafeMutableRawPointer.
+        let info = llama_wrapper_get_baseline_memory_info(UnsafeMutableRawPointer(model))
+        let size = info.model_size_bytes
+        let sysInfo: String? = info.system_info != nil ? String(cString: info.system_info) : nil
+        // Free the allocated system_info string.
+        var mutableInfo = info
+        llama_free_baseline_memory_info(&mutableInfo)
+        return (modelSize: size, systemInfo: sysInfo)
+    }
+    
+    /// Returns an estimate of current memory usage (in bytes) based on the state size.
+//    public func currentMemoryUsage() -> UInt64 {
+//        return llama_wrapper_get_current_memory_usage(UnsafeMutableRawPointer(context.pointer))
+//    }
 }
+
+
+
 
 private class Context {
     let pointer: OpaquePointer
@@ -590,14 +614,6 @@ extension [String] {
         let firstIndex = count
         let lastIndex = count * 2
         self.removeSubrange(firstIndex..<lastIndex)
-    }
-}
-
-extension Token {
-    enum Kind {
-        case end
-        case couldBeEnd
-        case normal
     }
 }
 
@@ -744,7 +760,7 @@ public struct Template {
     }
 }
 
-public enum Quantization: String {
+public enum Quantization: String, CaseIterable {
     case IQ1_S
     case IQ1_M
     case IQ2_XXS
