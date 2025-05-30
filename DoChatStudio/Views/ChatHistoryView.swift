@@ -8,7 +8,7 @@ import SwiftUI
 
 struct ChatHistoryView: View {
     @ObservedObject var document: DoChatStudioDocument
-    @ObservedObject var llm: LLM
+    @ObservedObject var llm: StatefulLLM
     @Environment(\.colorScheme) var colorScheme
         
     @State var showX: Bool = false
@@ -19,8 +19,8 @@ struct ChatHistoryView: View {
         VStack(alignment: .leading) {
             
             ScrollView {
-                ForEach(document.history, id: \.id) { chat in
-                    ChatBubbleView(chat: chat)
+                ForEach(document.messageHistory) { message in
+                    ChatBubbleView(chat: message)
                         .padding(2)
                         .overlay(alignment: .topTrailing) {
                             if showX {
@@ -34,7 +34,7 @@ struct ChatHistoryView: View {
                         }
                 }
                 if (document.llm?.isThinking ?? false) {
-                    ChatBubbleView(chat: Chat(role: .bot, content: document.llm?.output ?? "", ignored: false, llmState: llm.llmState))
+                    ChatBubbleView(chat: Message(role: .bot, content: document.llm?.output ?? "", ignored: false, llmState: llm.llmState))
                 }
             }
             .defaultScrollAnchor(.bottom)
@@ -63,7 +63,7 @@ struct ChatHistoryView: View {
 }
 
 #Preview {
-    ChatHistoryView(document: DoChatStudioDocument(text: "Chat"), llm: LLM(from: "")!)
+    ChatHistoryView(document: DoChatStudioDocument(text: "Chat"), llm: StatefulLLM(from: "")!)
 }
 
 // A view that lays out the color swatches in a grid

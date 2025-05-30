@@ -9,12 +9,14 @@ import llama
 
 public typealias Model = OpaquePointer
 
+public typealias Token = llama_token
+
 extension Model {
-    public var endToken: Token { llama_token_eos(self) }
-    public var newLineToken: Token { llama_token_nl(self) }
+    public var endToken: Token { llama_vocab_eos(self) }
+    public var newLineToken: Token { llama_vocab_nl(self) }
     
     public func shouldAddBOS() -> Bool {
-        let addBOS = llama_add_bos_token(self);
+        let addBOS = llama_vocab_get_add_bos(self);
         guard !addBOS else {
             return llama_vocab_type(self) == LLAMA_VOCAB_TYPE_SPM
         }

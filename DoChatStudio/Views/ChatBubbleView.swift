@@ -7,7 +7,7 @@
 import SwiftUI
 
 struct ChatBubbleView: View {
-    let chat: Chat
+    let chat: Message
     
     var body: some View {
         let chatBackgroundColor = chat.role == .user ?  customGradient(Color.blue.opacity(0.2)) : chat.ignored ? customGradient(Color.orange.opacity(0.125)) : customGradient(Color.green.opacity(0.2))
@@ -49,7 +49,7 @@ struct ChatBubbleView: View {
 }
 
 #Preview {
-    ChatBubbleView(chat: Chat(role: .bot, content: "Hello!"))
+    ChatBubbleView(chat: Message(role: .bot, content: "Hello!"))
 }
 
 func customGradient(_ color: Color = .gray) -> LinearGradient{

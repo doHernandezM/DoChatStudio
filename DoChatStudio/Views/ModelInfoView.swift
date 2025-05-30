@@ -10,22 +10,22 @@ import SwiftUI
 
 struct ModelInfoView: View {
     @ObservedObject var document: DoChatStudioDocument
-    @ObservedObject var llm: LLM
+    @ObservedObject var llm: StatefulLLM
     
     
     var body: some View {
             VStack(alignment: .leading) {
                 VStack(alignment: .leading) {
-                    Text("Name: \(llm.modelName )")
+                    Text("Name: \("llm.modelName" )")
                 }
                 VStack(alignment: .leading) {
-                    Text("Author: \(llm.modelAuthor)")
+                    Text("Author: \("llm.modelAuthor")")
                 }
                 VStack(alignment: .leading) {
-                    Text("Architecture: \(document.llm?.modelArchitecture ?? "")")
+                    Text("Architecture: \("document.llm?.modelArchitecture ?? ")")
                 }
                 VStack(alignment: .leading) {
-                    Text("Path: \(document.url?.absoluteString ?? "")")
+                    Text("Path: \("document.url?.absoluteString ?? ")")
                 }
 //                VStack(alignment: .leading) {
 //                    Text("hparams: \(llm.systemInfo())")
@@ -38,5 +38,5 @@ struct ModelInfoView: View {
 }
 
 #Preview {
-    ModelInfoView(document: DoChatStudioDocument(text: "Chat"), llm: LLM(from: "")!)
+    ModelInfoView(document: DoChatStudioDocument(text: "Chat"), llm: StatefulLLM(from: "")!)
 }

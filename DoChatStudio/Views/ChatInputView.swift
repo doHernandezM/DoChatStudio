@@ -9,7 +9,7 @@ import SwiftUI
 
 struct ChatInputView: View {
     @ObservedObject var document: DoChatStudioDocument
-    @ObservedObject var llm: LLM
+    @ObservedObject var llm: StatefulLLM
     @State var input = "Give me seven national flag emojis people use the most; You must include South Korea."
     var isActive: Bool {
         get {
@@ -85,5 +85,5 @@ struct ChatInputView: View {
 }
 
 #Preview {
-    ChatInputView(document: DoChatStudioDocument(text: "Chat"), llm: LLM(from: "")!)
+    ChatInputView(document: DoChatStudioDocument(text: "Chat"), llm: StatefulLLM(from: "")!)
 }

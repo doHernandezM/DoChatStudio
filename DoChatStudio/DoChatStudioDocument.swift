@@ -5,6 +5,7 @@
 
 import SwiftUI
 import UniformTypeIdentifiers
+import LLM
 
 class DoChatStudioDocument: FileDocument, ObservableObject {
     // MARK: - Published Properties
@@ -14,10 +15,22 @@ class DoChatStudioDocument: FileDocument, ObservableObject {
     @Published var urlExists: Bool = false
     var urlLoadError: Bool = false
     @Published var systemPrompt: String
-    @Published var llm: LLM? = nil {
+    @Published var llm: StatefulLLM? = nil {
         willSet { objectWillChange.send() }
     }
     @Published var history: [Chat] = [] {
+        willSet { objectWillChange.send() }
+        didSet {
+            var chats: [Message] = []
+            
+            for chat in self.history {
+                chats.append(Message(chat: chat))
+            }
+            
+            messageHistory = chats
+        }
+    }
+    @Published var messageHistory: [Message] = [] {
         willSet { objectWillChange.send() }
     }
     
@@ -29,11 +42,12 @@ class DoChatStudioDocument: FileDocument, ObservableObject {
     // MARK: - Other Properties
     var isLoaded: Bool = false
     var id: UUID
-
+    
     // Specify the document type.
     static var readableContentTypes: [UTType] { [.doChatStudio] }
     
     // MARK: - Helper Struct for JSON Coding
+
     private struct DocumentData: Codable {
         var url: URL?
         var systemPrompt: String
@@ -45,8 +59,85 @@ class DoChatStudioDocument: FileDocument, ObservableObject {
         var resetSeedAfterResponse: Bool
         
         var id: UUID
+
+        private enum CodingKeys: String, CodingKey {
+            case url, systemPrompt, history
+            case locked, password, resetSeedAfterResponse, id
+        }
+        private enum ChatKeys: String, CodingKey {
+            case role, content
+        }
+
+        init(
+              url: URL?,
+              systemPrompt: String,
+              history: [Chat],
+              locked: Bool,
+              password: Bool,
+              resetSeedAfterResponse: Bool,
+              id: UUID
+            ) {
+              self.url = url
+              self.systemPrompt = systemPrompt
+              self.history = history
+              self.locked = locked
+              self.password = password
+              self.resetSeedAfterResponse = resetSeedAfterResponse
+              self.id = id
+            }
+        
+        init(from decoder: Decoder) throws {
+            let c = try decoder.container(keyedBy: CodingKeys.self)
+            url = try c.decodeIfPresent(URL.self, forKey: .url)
+            systemPrompt = try c.decode(String.self, forKey: .systemPrompt)
+            locked = try c.decode(Bool.self, forKey: .locked)
+            password = try c.decode(Bool.self, forKey: .password)
+            resetSeedAfterResponse = try c.decode(Bool.self, forKey: .resetSeedAfterResponse)
+            id = try c.decode(UUID.self, forKey: .id)
+
+            var historyArray = try c.nestedUnkeyedContainer(forKey: .history)
+            var chats: [Chat] = []
+            while !historyArray.isAtEnd {
+                let chatContainer = try historyArray.nestedContainer(keyedBy: ChatKeys.self)
+                let roleString = try chatContainer.decode(String.self, forKey: .role)
+                let role: Role = {
+                    switch roleString {
+                    case "user": return .user
+                    case "bot":  return .bot
+                    default:
+                        // fallback or throw
+                        return .user
+                    }
+                }()
+                let content = try chatContainer.decode(String.self, forKey: .content)
+                chats.append((role: role, content: content))
+            }
+            history = chats
+        }
+
+        func encode(to encoder: Encoder) throws {
+            var c = encoder.container(keyedBy: CodingKeys.self)
+            try c.encodeIfPresent(url, forKey: .url)
+            try c.encode(systemPrompt, forKey: .systemPrompt)
+            try c.encode(locked, forKey: .locked)
+            try c.encode(password, forKey: .password)
+            try c.encode(resetSeedAfterResponse, forKey: .resetSeedAfterResponse)
+            try c.encode(id, forKey: .id)
+
+            var historyArray = c.nestedUnkeyedContainer(forKey: .history)
+            for chat in history {
+                var chatContainer = historyArray.nestedContainer(keyedBy: ChatKeys.self)
+                let roleString: String = {
+                    switch chat.role {
+                    case .user: return "user"
+                    case .bot:  return "bot"
+                    }
+                }()
+                try chatContainer.encode(roleString, forKey: .role)
+                try chatContainer.encode(chat.content, forKey: .content)
+            }
+        }
     }
-    
     // MARK: - Initializers
     
     /// Creates a new document with the given system prompt.
@@ -56,7 +147,7 @@ class DoChatStudioDocument: FileDocument, ObservableObject {
         
         // For new documents you may want to set url later.
         DispatchQueue.global(qos: .default).async {
-//            self.initLLM()
+            //            self.initLLM()
         }
     }
     
@@ -109,27 +200,28 @@ class DoChatStudioDocument: FileDocument, ObservableObject {
     }
     
     // MARK: - Main LLM Initialization
-    @MainActor
+    
     func initLLM(path: URL) {
         url = path
         
         llm = nil
-
+        
         if url == nil {return}
         
         // Load the LLM from the local copy on the main thread.
-        DispatchQueue.main.async {
-            if let llmInstance = LLM.init(from: self.url!,
-                                          template: .customJinja(self.systemPrompt)) {
+        Task { @MainActor in
+            if let llmInstance = StatefulLLM.init(from: self.url!,
+                                                  template: .llama()){
                 self.urlExists = true
                 llmInstance.history.append(contentsOf: self.history)
+                //append(contentsOf: self.history)
                 
-                llmInstance.modelName = llmInstance.model.name ?? ""
-                llmInstance.modelArchitecture = llmInstance.model.architecture ?? ""
-                llmInstance.modelAuthor = llmInstance.model.author ?? ""
-                llmInstance.modelQuantizationType = llmInstance.model.quantizationType ?? ""
+//                llmInstance.modelName = llmInstance.model.name ?? ""
+//                llmInstance.modelArchitecture = llmInstance.model.architecture ?? ""
+//                llmInstance.modelAuthor = llmInstance.model.author ?? ""
+//                llmInstance.modelQuantizationType = llmInstance.model.quantizationType ?? ""
                 
-                print("Model \(llmInstance.modelName) initialized successfully from \(self.url!)")
+//                print("Model \(llmInstance.modelName) initialized successfully from \(self.url!)")
                 self.llm = llmInstance
                 self.isLoaded = true
             } else {

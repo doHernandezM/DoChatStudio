@@ -13,7 +13,7 @@ fileprivate var randomTint = Color.random
 struct ModelAdjustmentView: View {
     
     @ObservedObject var document: DoChatStudioDocument
-    @ObservedObject var llm: LLM
+    @ObservedObject var llm: StatefulLLM
     
     var body: some View {
         VStack {
@@ -157,7 +157,7 @@ struct ModelAdjustmentView: View {
                                 Double(llm.historyLimit)
                             },
                             set: { newValue in
-                                llm.historyLimit = Int32(newValue)
+                                llm.historyLimit = Int(newValue)
                             }
                         ),
                         in: 0...100,
@@ -183,7 +183,7 @@ struct ModelAdjustmentView: View {
 }
 
 #Preview {
-    ModelAdjustmentView(document: DoChatStudioDocument(text: "Chat"), llm: LLM(from: "")!)
+    ModelAdjustmentView(document: DoChatStudioDocument(text: "Chat"), llm: StatefulLLM(from: "")!)
 }
 
 func generateRandomUInt32() -> UInt32? {
