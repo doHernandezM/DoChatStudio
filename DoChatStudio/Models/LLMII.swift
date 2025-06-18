@@ -1,7 +1,8 @@
-// Extensions.swift
+// StatefulLLM.swift
 
 import Foundation
 import SwiftUI
+import llama
 import LLM
 
 // MARK: - LLMState
@@ -18,7 +19,7 @@ public enum LLMState: String {
     case error
     case downloading
     case updating
-
+    
     public var color: Color {
         switch self {
         case .initializing: return .pink
@@ -36,159 +37,102 @@ public enum LLMState: String {
     }
 }
 
-// MARK: - LLMOutputDelegate
-
-public protocol LLMOutputDelegate: AnyObject {
-    /// Called for every partial token-delta as it arrives.
-    func newOutput(outputChat: Chat)
-}
-
 // MARK: - StatefulLLM Subclass
 
 /// A subclass of upstream A’s `LLM` that adds SwiftUI-friendly state,
 /// delegate callbacks, and recovery hook.
+@MainActor
 open class StatefulLLM: LLM {
     @Published public private(set) var llmState: LLMState = .initializing
-    public weak var delegate: LLMOutputDelegate?
-
-    @Published var isThinking: Bool = false {
-        willSet {
-            objectWillChange.send()
-        }
-    }
     
+    @Published var isThinking: Bool = false
+    
+    @Published public private(set) var publishedOutput: String = ""
     
     public var shouldContinuePredicting = false
-    public var shouldPausePredicting = false
+//    public var shouldPausePredicting = false
     public func stopGeneration() {
-        isThinking = false
-        shouldPausePredicting = false
-        shouldContinuePredicting = false
-        self.llmState = .stopped
-    }
-    
-    
-    public override init?(
-        from path: String,
-        stopSequence: String? = nil,
-        history: [Chat] = [],
-        seed: UInt32 = .random(in: .min ... .max),
-        topK: Int32 = 40,
-        topP: Float = 0.95,
-        temp: Float = 0.8,
-        historyLimit: Int = 8,
-        maxTokenCount: Int32 = 2048
-    ) {
-        super.init(
-            from: path,
-            stopSequence: stopSequence,
-            history: history,
-            seed: seed,
-            topK: topK,
-            topP: topP,
-            temp: temp,
-            historyLimit: historyLimit,
-            maxTokenCount: maxTokenCount
-        )
-        llmState = .idle
-    }
+        self.isThinking = false
+            self.llmState   = .stopped
 
-    /// Override the recovery hook to emit a "TL;DR" on overflow.
-    override open func recoverFromLengthy(
-        _ input: String,
-        to output: AsyncStream<String>.Continuation
-    ) {
-        output.yield("TL;DR")
-        llmState = .error
+//            self.shouldPausePredicting    = false
+            self.shouldContinuePredicting = false
+
+
+        super.stop()
+        
     }
     
     override open func respond(to input: String) async {
-        await respond(to: input) { [weak self] response in
-            guard let self = self else { return "" }
-            llmState = .preparing
-            await self.setOutput(to: "")
-            llmState = .generating
+        
+        if llmState == .stopped {
+            llmState = .idle
+        }
+        self.shouldContinuePredicting = true
+        self.llmState = .preparing
+        self.isThinking = true
+        self.updateOutputManually(to: "")
+    
+        
+        await respond(to: input) { [weak self] responseStream in
+            guard let self else { return "" }
+
             
-            for await responseDelta in response {
-                self.update(responseDelta)
-                await self.setOutput(to: self.output + responseDelta)
-                self.delegate?.newOutput(outputChat: (.bot, responseDelta))
+            await MainActor.run { self.llmState = .generating }
+            
+            var collected = ""
+            
+            for await responseDelta in responseStream {
+//                // Check for pause
+//                if self.shouldPausePredicting {
+//                    await MainActor.run { self.llmState = .paused }
+//                    repeat {
+//                        try? await Task.sleep(nanoseconds: 50_000_000) // 50ms
+//                    } while self.shouldPausePredicting && self.shouldContinuePredicting
+//                    
+//                    await MainActor.run {
+//                        if self.shouldContinuePredicting {
+//                            self.llmState = .generating
+//                        }
+//                    }
+//                }
+                
+                // Check for stop
+                guard self.shouldContinuePredicting else {
+                    print("⚠️ Generation stopped early")
+                    break
                 }
+                
+               self.update(responseDelta)
+                collected += responseDelta
+                self.updateOutputManually(to: collected)
+                
+            }
+            
             self.update(nil)
             
-            let trimmedOutput = self.output.trimmingCharacters(in: .whitespacesAndNewlines)
-            llmState = .finishing
-            await self.setOutput(to: trimmedOutput.isEmpty ? "..." : trimmedOutput)
-            llmState = .idle
-            return self.output
+            // Final cleanup
+            let trimmed = collected.trimmingCharacters(in: .whitespacesAndNewlines)
+            let finalOutput = trimmed.isEmpty ? "..." : trimmed
+            self.updateOutputManually(to: finalOutput)
             
+            await MainActor.run {
+                self.llmState = .finishing
+                self.isThinking = false
+            }
+            self.postprocess(finalOutput)
+            await MainActor.run { self.llmState = .idle }
             
+            return finalOutput
         }
+        
     }
+    
+    @MainActor
+    public func updateOutputManually(to newOutput: String) {
+        self.publishedOutput = newOutput
+        self.setOutput(to: newOutput) // Call the inherited method
+    }
+    
+    
 }
-//
-//// MARK: - Performance Extensions on LLMCore
-//
-//public struct LlamaPerfContextData {
-//    public let tStartMs: Double
-//    public let tLoadMs: Double
-//    public let tPEvalMs: Double
-//    public let tEvalMs: Double
-//    public let nPEval: Int
-//    public let nEval: Int
-//}
-//
-//extension LLMCore {
-//    /// Returns a string with system information from llama.
-//    public func systemInfo() -> String {
-//        guard let cStr = llama_print_system_info() else { return "" }
-//        return String(cString: cStr)
-//    }
-//
-//    /// Returns performance metrics for the current context.
-//    public func perfContextData() -> LlamaPerfContextData? {
-//        let data = llama_perf_context(self.context)
-//        return LlamaPerfContextData(
-//            tStartMs: data.t_start_ms,
-//            tLoadMs: data.t_load_ms,
-//            tPEvalMs: data.t_p_eval_ms,
-//            tEvalMs: data.t_eval_ms,
-//            nPEval: Int(data.n_p_eval),
-//            nEval: Int(data.n_eval)
-//        )
-//    }
-//
-//    /// Resets performance counters in the current context.
-//    public func resetPerfContext() {
-//        llama_perf_context_reset(self.context)
-//    }
-//}
-//
-//// MARK: - Helpers for llama_batch
-//
-//extension llama_batch {
-//    /// Clears all tokens from the batch.
-//    mutating func clear() {
-//        self.n_tokens = 0
-//    }
-//
-//    /// Adds a token to the batch.
-//    mutating func add(
-//        _ token: llama_token,
-//        _ position: Int32,
-//        _ ids: [Int32],
-//        _ logit: Bool
-//    ) {
-//        let i = Int(self.n_tokens)
-//        self.token[i]    = token
-//        self.pos[i]      = position
-//        self.n_seq_id[i] = Int32(ids.count)
-//        if let seq = self.seq_id[i] {
-//            for (j, id) in ids.enumerated() {
-//                seq[j] = id
-//            }
-//        }
-//        self.logits[i]   = logit ? 1 : 0
-//        self.n_tokens   += 1
-//    }
-//}

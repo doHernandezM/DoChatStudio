@@ -14,10 +14,10 @@ struct ChatInputView: View {
     var isActive: Bool {
         get {
             switch llm.llmState {
-                case .preparing, .thinking, .generating:
-                    return true
-                 default:
-                    return false
+            case .preparing, .thinking, .generating:
+                return true
+            default:
+                return false
             }
         }
     }
@@ -38,10 +38,15 @@ struct ChatInputView: View {
             HStack() {
                 Button {
                     withAnimation {
-                        document.respond(input: input)
+                        if llm.isThinking {
+                            llm.stopGeneration()
+                        } else
+                        {
+                            document.respond(input: input)
+                        }
                     }
                 }label: {
-                    Image(systemName: isActive == false ? "play.fill" : "pause")
+                    Image(systemName: isActive == false ? "play.fill" : "stop.fill")
                         .frame(width:64, height: 64)
                         .background(Circle().fill(DoStyle.gradient(color: llm.llmState.color.mix(with: .black, by: 0.25))))
                         .overlay(Circle().fill(Color.clear)
@@ -51,25 +56,25 @@ struct ChatInputView: View {
                 }
                 .buttonStyle(.plain)
                 
-                if llm.isThinking {
-                    Button {
-                        withAnimation {
-                            document.stop()
-                        }
-                    } label: {
-                        Image(systemName: "stop.fill")
-                            .frame(width: 64, height: 48)
-                            .background(RoundedRectangle(cornerRadius: 10).fill(DoStyle.gradient(color: .red)))
-                            .overlay(RoundedRectangle(cornerRadius: 10).fill(Color.clear)
-                                .strokeBorder(DoStyle.gradient(color: .red.mix(with: .black, by: 0.1)), lineWidth: 2)
-                                .shadow(radius: 2)
-                                .rotationEffect(Angle(degrees: 180)))
-                    }
-                    .buttonStyle(.plain)
-                    .opacity(!llm.isThinking ? 0 : 1)
-                    .scaleEffect(!llm.isThinking ? 0.9 : 1.0)
-                    .animation(.spring(duration: 1.0), value: !llm.isThinking)
-                }
+//                if llm.isThinking {
+//                    Button {
+//                        withAnimation {
+//                            llm.stopGeneration()
+//                        }
+//                    } label: {
+//                        Image(systemName: "stop.fill")
+//                            .frame(width: 64, height: 48)
+//                            .background(RoundedRectangle(cornerRadius: 10).fill(DoStyle.gradient(color: .red)))
+//                            .overlay(RoundedRectangle(cornerRadius: 10).fill(Color.clear)
+//                                .strokeBorder(DoStyle.gradient(color: .red.mix(with: .black, by: 0.1)), lineWidth: 2)
+//                                .shadow(radius: 2)
+//                                .rotationEffect(Angle(degrees: 180)))
+//                    }
+//                    .buttonStyle(.plain)
+//                    .opacity(!llm.isThinking ? 0 : 1)
+//                    .scaleEffect(!llm.isThinking ? 0.9 : 1.0)
+//                    .animation(.spring(duration: 1.0), value: !llm.isThinking)
+//                }
                 
             }
             .font(.title).fontWeight(.heavy)

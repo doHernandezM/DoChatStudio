@@ -33,8 +33,8 @@ struct ChatHistoryView: View {
                             }
                         }
                 }
-                if (document.llm?.isThinking ?? false) {
-                    ChatBubbleView(chat: Message(role: .bot, content: document.llm?.output ?? "", ignored: false, llmState: llm.llmState))
+                if llm.isThinking {
+                    ChatBubbleView(chat: Message(role: .bot, content: document.llm?.publishedOutput ?? "", ignored: false, llmState: llm.llmState))
                 }
             }
             .defaultScrollAnchor(.bottom)

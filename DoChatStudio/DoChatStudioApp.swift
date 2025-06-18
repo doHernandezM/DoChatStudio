@@ -27,6 +27,10 @@ struct DoChatStudioApp: App {
             }
             .onAppear() {
                 print("file:\(file)")
+                
+                print("RAM:")
+                print("getAppMemoryUsage", getAppMemoryUsage())
+                print("getAvailableMemory", getAvailableMemory())
             }
         }
     }

@@ -9,11 +9,11 @@ import llama
 
 public typealias Model = OpaquePointer
 
-public typealias Token = llama_token
+public typealias DoToken = llama_token
 
 extension Model {
-    public var endToken: Token { llama_vocab_eos(self) }
-    public var newLineToken: Token { llama_vocab_nl(self) }
+    public var endToken: DoToken { llama_vocab_eos(self) }
+    public var newLineToken: DoToken { llama_vocab_nl(self) }
     
     public func shouldAddBOS() -> Bool {
         let addBOS = llama_vocab_get_add_bos(self);
@@ -23,12 +23,12 @@ extension Model {
         return addBOS
     }
     
-    public func decodeOnly(_ token: Token) -> String {
+    public func decodeOnly(_ token: DoToken) -> String {
         var nothing: [CUnsignedChar] = []
         return decode(token, with: &nothing)
     }
     
-    public func decode(_ token: Token, with multibyteCharacter: inout [CUnsignedChar]) -> String {
+    public func decode(_ token: DoToken, with multibyteCharacter: inout [CUnsignedChar]) -> String {
         var bufferLength = 16
         var buffer: [CChar] = .init(repeating: 0, count: bufferLength)
         let actualLength = Int(llama_token_to_piece(self, token, &buffer, Int32(bufferLength), 0, false))
@@ -49,7 +49,7 @@ extension Model {
         return decoded
     }
     
-    public func encode(_ text: borrowing String) -> [Token] {
+    public func encode(_ text: borrowing String) -> [DoToken] {
         let addBOS = true
         let count = Int32(text.cString(using: .utf8)!.count)
         var tokenCount = count + 1
