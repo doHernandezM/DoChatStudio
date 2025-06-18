@@ -10,30 +10,6 @@
     "%lld" : {
 
     },
-    "❄️" : {
-
-    },
-    "❓" : {
-
-    },
-    "🎨" : {
-
-    },
-    "📖" : {
-
-    },
-    "📜" : {
-
-    },
-    "🔁" : {
-
-    },
-    "🔥" : {
-
-    },
-    "🖌️" : {
-
-    },
     "Architecture: %@" : {
 
     },
@@ -52,12 +28,6 @@
     "Default Model: %@" : {
 
     },
-    "History Limit" : {
-
-    },
-    "History Limit: %d" : {
-
-    },
     "Model Configuration" : {
 
     },
@@ -73,9 +43,6 @@
     "Reset Seed After Each Response" : {
 
     },
-    "Seed: %u" : {
-
-    },
     "Select a Llama .GGUF file" : {
 
     },
@@ -83,24 +50,6 @@
 
     },
     "Size: %@" : {
-
-    },
-    "Temperature" : {
-
-    },
-    "Temperature: %.2f" : {
-
-    },
-    "TopK" : {
-
-    },
-    "TopK: %d" : {
-
-    },
-    "TopP" : {
-
-    },
-    "TopP: %.2f" : {
 
     }
   },

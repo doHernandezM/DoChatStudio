@@ -13,14 +13,14 @@ fileprivate var randomTint = Color.random
 struct ModelAdjustmentView: View {
     
     @ObservedObject var document: DoChatStudioDocument
-    @ObservedObject var llm: StatefulLLM
+    @ObservedObject var llm: LLMRunner
     
     var body: some View {
         VStack {
             if let llm = document.llm {
                 // Seed Slider
                 VStack(alignment: .leading) {
-                    Text("Seed: \(llm.seed)")
+//                    Text("Seed: \(llm.seed)")
                     
                     HStack {
                         Button(action: {
@@ -37,7 +37,7 @@ struct ModelAdjustmentView: View {
                             if let random = generateRandomUInt32() {
                                 print("Random UInt32: \(random)")
                                 
-                                llm.seed = UInt32(random)
+//                                llm.seed = UInt32(random)
                             }
                             
                         }  ) {
@@ -65,115 +65,115 @@ struct ModelAdjustmentView: View {
                 
                 Divider().overlay(Color.brown)
                 
-                VStack(alignment: .leading) {
-                    Text("TopK: \(llm.topK, specifier: "%d")")
-                    Slider(
-                        value: Binding<Double>(
-                            get: {
-                                Double(llm.topK)
-                            },
-                            set: { newValue in
-                                llm.topK = Int32(newValue)
-                            }
-                        ),
-                        in: 1...100,
-                        //step: 1,
-                        label: {
-                            Text("TopK")
-                        },
-                        minimumValueLabel: {
-                            Text("🔁")
-                        },
-                        maximumValueLabel: {
-                            Text("🎨")
-                        }
-                    )
-                    .tint(.green)
-                }
+//                VStack(alignment: .leading) {
+//                    Text("TopK: \(llm.topK, specifier: "%d")")
+//                    Slider(
+//                        value: Binding<Double>(
+//                            get: {
+//                                Double(llm.topK)
+//                            },
+//                            set: { newValue in
+//                                llm.topK = Int32(newValue)
+//                            }
+//                        ),
+//                        in: 1...100,
+//                        //step: 1,
+//                        label: {
+//                            Text("TopK")
+//                        },
+//                        minimumValueLabel: {
+//                            Text("🔁")
+//                        },
+//                        maximumValueLabel: {
+//                            Text("🎨")
+//                        }
+//                    )
+//                    .tint(.green)
+//                }
                 
                 Divider().hidden()
                 
-                VStack(alignment: .leading) {
-                    Text("TopP: \(llm.topP, specifier: "%.2f")")
-                    Slider(
-                        value: Binding<Double>(
-                            get: {
-                                Double(llm.topP)
-                            },
-                            set: { newValue in
-                                llm.topP = Float(newValue)
-                            }
-                        ),
-                        in: 0.0...1.0,
-                        //step: 0.01,
-                        label: {
-                            Text("TopP")
-                        },
-                        minimumValueLabel: {
-                            Text("📜")
-                        },
-                        maximumValueLabel: {
-                            Text("🖌️")
-                        }
-                    )
-                    .tint(.green)
-                }
+//                VStack(alignment: .leading) {
+//                    Text("TopP: \(llm.topP, specifier: "%.2f")")
+//                    Slider(
+//                        value: Binding<Double>(
+//                            get: {
+//                                Double(llm.topP)
+//                            },
+//                            set: { newValue in
+//                                llm.topP = Float(newValue)
+//                            }
+//                        ),
+//                        in: 0.0...1.0,
+//                        //step: 0.01,
+//                        label: {
+//                            Text("TopP")
+//                        },
+//                        minimumValueLabel: {
+//                            Text("📜")
+//                        },
+//                        maximumValueLabel: {
+//                            Text("🖌️")
+//                        }
+//                    )
+//                    .tint(.green)
+//                }
                 
                 Divider().overlay(Color.brown)
                 
-                VStack(alignment: .leading) {
-                    Text("Temperature: \(llm.temp, specifier: "%.2f")")
-                    Slider(
-                        value: Binding<Double>(
-                            get: {
-                                Double(llm.temp)
-                            },
-                            set: { newValue in
-                                llm.temp = Float(newValue)
-                            }
-                        ),
-                        in: 0.0...5.0,
-                        //step: 0.01,
-                        label: {
-                            Text("Temperature")
-                        },
-                        minimumValueLabel: {
-                            Text("❄️")
-                        },
-                        maximumValueLabel: {
-                            Text("🔥")
-                        }
-                    )
-                    .tint(.blue)
-                }
+//                VStack(alignment: .leading) {
+//                    Text("Temperature: \(llm.temp, specifier: "%.2f")")
+//                    Slider(
+//                        value: Binding<Double>(
+//                            get: {
+//                                Double(llm.temp)
+//                            },
+//                            set: { newValue in
+//                                llm.temp = Float(newValue)
+//                            }
+//                        ),
+//                        in: 0.0...5.0,
+//                        //step: 0.01,
+//                        label: {
+//                            Text("Temperature")
+//                        },
+//                        minimumValueLabel: {
+//                            Text("❄️")
+//                        },
+//                        maximumValueLabel: {
+//                            Text("🔥")
+//                        }
+//                    )
+//                    .tint(.blue)
+//                }
                 
                 Divider().overlay(Color.brown)
                 
-                VStack(alignment: .leading) {
-                    Text("History Limit: \(llm.historyLimit, specifier: "%d")")
-                    Slider(
-                        value: Binding<Double>(
-                            get: {
-                                Double(llm.historyLimit)
-                            },
-                            set: { newValue in
-                                llm.historyLimit = Int(newValue)
-                            }
-                        ),
-                        in: 0...100,
-                        //step: 1,
-                        label: {
-                            Text("History Limit")
-                        },
-                        minimumValueLabel: {
-                            Text("❓")
-                        },
-                        maximumValueLabel: {
-                            Text("📖")
-                        }
-                    )
-                    .tint(.brown)
-                }
+//                VStack(alignment: .leading) {
+//                    Text("History Limit: \(llm.historyLimit, specifier: "%d")")
+//                    Slider(
+//                        value: Binding<Double>(
+//                            get: {
+//                                Double(llm.historyLimit)
+//                            },
+//                            set: { newValue in
+//                                llm.historyLimit = Int(newValue)
+//                            }
+//                        ),
+//                        in: 0...100,
+//                        //step: 1,
+//                        label: {
+//                            Text("History Limit")
+//                        },
+//                        minimumValueLabel: {
+//                            Text("❓")
+//                        },
+//                        maximumValueLabel: {
+//                            Text("📖")
+//                        }
+//                    )
+//                    .tint(.brown)
+//                }
                 
             }
             Spacer()
@@ -183,7 +183,7 @@ struct ModelAdjustmentView: View {
 }
 
 #Preview {
-    ModelAdjustmentView(document: DoChatStudioDocument(text: "Chat"), llm: StatefulLLM(from: "")!)
+    ModelAdjustmentView(document: DoChatStudioDocument(text: "Chat"), llm: LLMRunner())
 }
 
 func generateRandomUInt32() -> UInt32? {

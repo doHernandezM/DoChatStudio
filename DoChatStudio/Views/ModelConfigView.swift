@@ -9,7 +9,7 @@ import SwiftUI
 
 struct ModelConfigView: View {
     @ObservedObject var document: DoChatStudioDocument
-    @ObservedObject var llm: StatefulLLM
+    @ObservedObject var llm: LLMRunner
     
     @Environment(\.colorScheme) var colorScheme
         
@@ -35,5 +35,5 @@ struct ModelConfigView: View {
 }
 
 #Preview {
-    ModelConfigView(document: DoChatStudioDocument(text: "Chat"), llm: StatefulLLM(from: "")!)
+    ModelConfigView(document: DoChatStudioDocument(text: "Chat"), llm: LLMRunner())
 }

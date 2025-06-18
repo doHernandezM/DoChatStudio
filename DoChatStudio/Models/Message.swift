@@ -7,8 +7,14 @@
 //public typealias Chat = (role: Role, content: String)
 
 import SwiftUI
-import LLM
 
+public enum Role {
+    case user
+    case bot
+}
+
+public typealias Chat = (role: Role, content: String)
+ 
 public struct Message: Identifiable, Codable {
     public let id: UUID
     

@@ -8,7 +8,7 @@ import SwiftUI
 
 struct ChatHistoryView: View {
     @ObservedObject var document: DoChatStudioDocument
-    @ObservedObject var llm: StatefulLLM
+    @ObservedObject var llm: LLMRunner
     @Environment(\.colorScheme) var colorScheme
         
     @State var showX: Bool = false
@@ -63,7 +63,7 @@ struct ChatHistoryView: View {
 }
 
 #Preview {
-    ChatHistoryView(document: DoChatStudioDocument(text: "Chat"), llm: StatefulLLM(from: "")!)
+    ChatHistoryView(document: DoChatStudioDocument(text: "Chat"), llm: LLMRunner())
 }
 
 // A view that lays out the color swatches in a grid

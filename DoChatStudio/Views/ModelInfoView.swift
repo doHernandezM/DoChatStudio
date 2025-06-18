@@ -10,7 +10,7 @@ import SwiftUI
 
 struct ModelInfoView: View {
     @ObservedObject var document: DoChatStudioDocument
-    @ObservedObject var llm: StatefulLLM
+    @ObservedObject var llm: LLMRunner
     
     
     var body: some View {
@@ -38,5 +38,5 @@ struct ModelInfoView: View {
 }
 
 #Preview {
-    ModelInfoView(document: DoChatStudioDocument(text: "Chat"), llm: StatefulLLM(from: "")!)
+    ModelInfoView(document: DoChatStudioDocument(text: "Chat"), llm: LLMRunner())
 }
