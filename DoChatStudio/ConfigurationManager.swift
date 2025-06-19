@@ -37,7 +37,7 @@ class ConfigurationManager {
     }
     
     func reloadModels() {
-        models = modelController.scanFolder(fileType: "gguf")
+//        models = modelController.scanFolder(fileType: "gguf")
     }
     
 }
