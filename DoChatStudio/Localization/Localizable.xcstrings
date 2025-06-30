@@ -1,23 +1,42 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
-    "" : {
+    "%@" : {
 
     },
-    "%@" : {
+    "%@ tokens/s" : {
+
+    },
+    "%f" : {
+
+    },
+    "%lf" : {
 
     },
     "%lld" : {
 
     },
-    "Architecture: %@" : {
+    "%lldMB" : {
 
     },
-    "Author: %@" : {
+    "Active Memory Size" : {
 
     },
-    "Basic Model to get you started" : {
+    "Cache" : {
 
+    },
+    "Cache Size" : {
+
+    },
+    "Cache(Current/Limit): %@ / %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Cache(Current/Limit): %1$@ / %2$@"
+          }
+        }
+      }
     },
     "Chat" : {
 
@@ -25,31 +44,71 @@
     "Choose a new model..." : {
 
     },
-    "Default Model: %@" : {
+    "Clear" : {
+
+    },
+    "Controls creativity vs. determinism. Low Temperature (0.1-0.3) → For predictable, repetitive outputs. Low Temperature (0.1-0.3) → For predictable, repetitive outputs. High Temperature (1.2+) → For wild, unexpected responses:." : {
+
+    },
+    "Controls the randomness of the generated text." : {
+
+    },
+    "Generate an unlimited number of tokens." : {
+
+    },
+    "GPU" : {
+
+    },
+    "GPU Memory(Active/Peak/Max): %@ / %@ / %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "GPU Memory(Active/Peak/Max): %1$@ / %2$@ / %3$@"
+          }
+        }
+      }
+    },
+    "Limit to " : {
 
     },
     "Model Configuration" : {
 
     },
-    "Name: %@" : {
+    "Peformance" : {
 
     },
-    "Path: %@" : {
+    "Penalizes repetition of tokens, reducing loops. Range: >1.0 to discourage repeating; <1.0 encourages repetition. When to adjust: Use around 1.1–1.2 for long-form content or dialogue to avoid stuttering." : {
 
     },
-    "Random Seed 🎲" : {
+    "Prompt" : {
 
     },
-    "Reset Seed After Each Response" : {
+    "Repetition Penalty: %.2f" : {
 
     },
     "Select a Llama .GGUF file" : {
 
     },
-    "Select Model..." : {
+    "Size: " : {
 
     },
-    "Size: %@" : {
+    "Temperature: %.2f" : {
+
+    },
+    "The max number of tokens that can be generated." : {
+
+    },
+    "Time" : {
+
+    },
+    "tokens." : {
+
+    },
+    "TopP: %.2f" : {
+
+    },
+    "Unlimited Tokens" : {
 
     }
   },

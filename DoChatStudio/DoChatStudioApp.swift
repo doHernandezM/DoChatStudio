@@ -23,10 +23,9 @@ struct DoChatStudioApp: App {
     var body: some Scene {
         DocumentGroup(newDocument: DoChatStudioDocument(text: "")) { file in
             Group {
-                ContentView(document: file.document)
+                ContentView(document: file.document, url: file.fileURL)
             }
             .onAppear() {
-                print("file:\(file)")
                 
 //                print("RAM:")
                 print("getAppMemoryUsage", getAppMemoryUsage())

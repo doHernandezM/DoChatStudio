@@ -1,71 +1,120 @@
-//  Chat.swift
-//  DoChatStudio
 //
-//  Created by Cosas on 2/2/25.
+//  Message.swift
+//  MLXChatExample
+//
+//  Created by İbrahim Çetin on 20.04.2025.
 //
 
-//public typealias Chat = (role: Role, content: String)
+import Foundation
+import MLX
+import MLXLMCommon
 
-import SwiftUI
+/// Represents a chat message in the conversation.
+/// Messages can contain text content and optional media attachments (images and videos).
+@Observable
+class Message: Identifiable, Codable {
+    /// Unique identifier for the message
+    let id: UUID
 
-public enum Role {
-    case user
-    case bot
-}
+    /// The role of the message sender (user, assistant, or system)
+    let role: Role
 
-public typealias Chat = (role: Role, content: String)
- 
-public struct Message: Identifiable, Codable {
-    public let id: UUID
+    /// The text content of the message
+    var content: String
+
+    /// Array of image URLs attached to the message
+    var images: [URL]
+
+    /// Array of video URLs attached to the message
+    var videos: [URL]
+
+    /// Timestamp when the message was created
+    let timestamp: Date
     
-    public let role: Role?
-    public let content: String
-    public let timestamp: Date
-    public var tokens: Int = 0
-    public var ignored: Bool = false
-    public var llmState: LLMState? = nil
-    
-    enum CodingKeys: String, CodingKey {
-        case id
-        case role
-        case content
-        case timestamp
-        case tokens
-        case ignored
-    }
-    
-    public init(from decoder: any Decoder) throws {
-        let container = try decoder.container(keyedBy: CodingKeys.self)
-        self.id = try container.decode(UUID.self, forKey: .id)
-        self.role = try container.decode(String.self, forKey: .role) == "user" ? .user : .bot
-        self.content = try container.decode(String.self, forKey: .content)
-        self.timestamp = try container.decode(Date.self, forKey: .timestamp)
-        self.tokens = try container.decode(Int.self, forKey: .tokens)
-        self.ignored = try container.decode(Bool.self, forKey: .ignored)
-    }
-    
-    public init (chat: Chat, ignored: Bool = false, llmState: LLMState? = nil) {
-        self.init(role: chat.role, content: chat.content, ignored: ignored, llmState: llmState)
-    }
-    
-    public init (role: Role?, content: String, ignored: Bool = false, llmState: LLMState? = nil) {
+    var generationInfo: GenerateCompletionInfo? = nil
+
+
+    /// Creates a new message with the specified role, content, and optional media attachments
+    /// - Parameters:
+    ///   - role: The role of the message sender
+    ///   - content: The text content of the message
+    ///   - images: Optional array of image URLs
+    ///   - videos: Optional array of video URLs
+    init(role: Role, content: String, images: [URL] = [], videos: [URL] = []) {
         self.id = UUID()
         self.role = role
         self.content = content
-        self.timestamp = Date()
-        self.ignored = ignored
-        self.llmState = llmState
+        self.images = images
+        self.videos = videos
+        self.timestamp = .now
+    }
+
+    /// Defines the role of the message sender in the conversation
+    enum Role: Codable {
+        /// Message from the user
+        case user
+        /// Message from the AI assistant
+        case assistant
+        /// System message providing context or instructions
+        case system
+    }
+}
+
+/// Convenience methods for creating different types of messages
+extension Message {
+    /// Creates a user message with optional media attachments
+    /// - Parameters:
+    ///   - content: The text content of the message
+    ///   - images: Optional array of image URLs
+    ///   - videos: Optional array of video URLs
+    /// - Returns: A new Message instance with user role
+    static func user(_ content: String, images: [URL] = [], videos: [URL] = []) -> Message {
+        Message(role: .user, content: content, images: images, videos: videos)
+    }
+
+    /// Creates an assistant message
+    /// - Parameter content: The text content of the message
+    /// - Returns: A new Message instance with assistant role
+    static func assistant(_ content: String) -> Message {
+        Message(role: .assistant, content: content)
+    }
+
+    /// Creates a system message
+    /// - Parameter content: The text content of the message
+    /// - Returns: A new Message instance with system role
+    static func system(_ content: String) -> Message {
+        Message(role: .system, content: content)
+    }
+}
+
+
+extension GenerateCompletionInfo: Codable {
+    
+    public init(from decoder: any Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        self.init(promptTokenCount: try c.decodeIfPresent(Int.self, forKey: .promptTokenCount) ?? 0
+                    , generationTokenCount: try c.decodeIfPresent(Int.self, forKey: .generationTokenCount) ?? 0
+                    , promptTime: try c.decodeIfPresent(TimeInterval.self, forKey: .promptTime) ?? TimeInterval()
+                    , generationTime: try c.decode(TimeInterval.self, forKey: .generateTime)
+        )
+    }
+    
+    private enum CodingKeys: String, CodingKey {
+        case promptTokenCount, generationTokenCount, promptTime, generateTime
     }
     
     public func encode(to encoder: any Encoder) throws {
-        let roleString = role == nil ? "" : role == .user ? "user" : "bot"
-        
-        var container = encoder.container(keyedBy: CodingKeys.self)
-        try container.encode(id, forKey: .id)
-        try container.encode(roleString, forKey: .role)
-        try container.encode(content, forKey: .content)
-        try container.encode(timestamp, forKey: .timestamp)
-        try container.encode(tokens, forKey: .tokens)
-        try container.encode(ignored, forKey: .ignored)
+        var c = encoder.container(keyedBy: CodingKeys.self)
+        try c.encodeIfPresent(promptTokenCount, forKey: .promptTokenCount)
+        try c.encodeIfPresent(generationTokenCount, forKey: .generationTokenCount)
+        try c.encodeIfPresent(promptTime, forKey: .promptTime)
+        try c.encodeIfPresent(generateTime, forKey: .generateTime)
+    
     }
+    
+//    public let promptTokenCount: Int
+//    public let generationTokenCount: Int
+//    public let promptTime: TimeInterval
+//    public let generateTime: TimeInterval
+//        
 }
