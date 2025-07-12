@@ -18,6 +18,12 @@ class DoChatStudioDocument: FileDocument, ObservableObject {
     @Published var urlExists: Bool = false
     var urlLoadError: Bool = false
     
+    var blockTermination: Bool {
+        get {
+            return self.chatModel?.isGenerating ?? false
+        }
+    }
+    
     @Published var chatModel: ChatViewModel? = nil /*{
                                                     willSet { objectWillChange.send() }
                                                     }*/
@@ -34,12 +40,14 @@ class DoChatStudioDocument: FileDocument, ObservableObject {
     
     init(text: String) {
         self.id = UUID()
-        Task {
-            let model = ChatViewModel(mlxService: MLXService())
-            await MainActor.run {
+        let model = ChatViewModel(mlxService: MLXService())
+        
+//        Task {
+//            await MainActor.run {
                 self.chatModel = model
-            }
-        }
+//            }
+//        }
+//        addSelfToAppDocument()
     }
     
     
@@ -60,6 +68,21 @@ class DoChatStudioDocument: FileDocument, ObservableObject {
             }
             self.chatModel = decoded.chatModel
         }
+        addSelfToAppDocument()
+    }
+    
+    func addSelfToAppDocument(remove: Bool = false) {
+        if remove {
+            DoChatStudioApp.documents.removeAll(where: {
+                $0.id == self.id
+            })
+        } else {
+            DoChatStudioApp.documents.append(self)
+        }
+    }
+    
+    deinit {
+        addSelfToAppDocument(remove: true)
     }
     
     func setFileURL(url:URL) {
@@ -178,6 +201,14 @@ private class DocumentData: Codable {
         try c.encode(password, forKey: .password)
         try c.encode(id, forKey: .id)
     }
+}
+
+extension DoChatStudioDocument: Equatable {
+    static func == (lhs: DoChatStudioDocument, rhs: DoChatStudioDocument) -> Bool {
+        lhs.id == rhs.id
+    }
+    
+    
 }
 
 enum DocumentError: Error {

@@ -14,16 +14,17 @@ import SwiftUI
 struct ChatView: View {
     /// View model that manages the chat state and business logic
     @Bindable private var vm: ChatViewModel
+    @State var currentTab: Int
     
     /// Initializes the chat view with a view model
     /// - Parameter viewModel: The view model to manage chat state
-    init(viewModel: ChatViewModel) {
+    init(viewModel: ChatViewModel, currentTab: Int) {
         self.vm = viewModel
+        self.currentTab = currentTab
     }
     
     var body: some View {
-//        Form(){
-            VStack(spacing: 0) {
+        VStack(spacing: 0) {
                 // Display conversation history
                 ConversationView(messages: vm.messages)
                 
@@ -38,9 +39,12 @@ struct ChatView: View {
                 
                 PromptField(
                     prompt: $vm.prompt, 
-                    sendButtonAction: vm.generate,
+                    sendButtonAction: {
+                        self.currentTab = 2
+                        await vm.generate()
+                    },
                     // Only show media button for vision-capable models
-                    mediaButtonAction: vm.selectedModel.isVisionModel
+                    mediaButtonAction: vm.selectedModel?.isVisionModel ?? false
                     ? {
                         vm.mediaSelection.isShowing = true
                     } : nil
@@ -52,9 +56,7 @@ struct ChatView: View {
         
 //        .formStyle(.automatic)
 //        .defaultScrollAnchor(.bottom)
-        .toolbar {
-            ChatToolbarView(vm: vm)
-        }
+
         // Handle media file selection
         .fileImporter(
             isPresented: $vm.mediaSelection.isShowing,
@@ -62,12 +64,20 @@ struct ChatView: View {
             onCompletion: vm.addMedia
         )
         .background(
-            RoundedRectangle(cornerRadius: 5)
+            RoundedRectangle(cornerRadius: 10)
                 .stroke(.tint.opacity(0.1), lineWidth: 1)
         )
+        
     }
 }
 
 #Preview {
-    ChatView(viewModel: ChatViewModel(mlxService: MLXService()))
+    ChatView(viewModel: ChatViewModel(mlxService: MLXService()), currentTab: 0)
+}
+
+
+extension Color {
+    static var transparentAccent: Color {
+        Color.accentColor.opacity(0.25)
+    }
 }

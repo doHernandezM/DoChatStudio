@@ -18,11 +18,11 @@ extension HubApi {
     /// under a 'huggingface' subdirectory.
 #if os(macOS)
     static let `default` = HubApi(
-        downloadBase: URL.documentsDirectory.appending(path: "doChat")
+        downloadBase: URL.documentsDirectory.appending(path: "doChat"), useOfflineMode: false
     )
 #else
     static let `default` = HubApi(
-        downloadBase: URL.documentsDirectory.appending(path: "doChat")
+        downloadBase: URL.documentsDirectory.appending(path: "doChat"), useOfflineMode: false
     )
 #endif
     

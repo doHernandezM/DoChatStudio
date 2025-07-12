@@ -22,6 +22,16 @@ struct MessageView: View {
 
     var body: some View {
         switch message.role {
+        case .prompt:
+            HStack {
+                Text(LocalizedStringKey(message.content))
+                    .padding(.vertical, 8)
+                    .padding(.horizontal, 12)
+                //                    .background(.accent.opacity(0.75), in: .rect(cornerRadius: 16).stroke(lineWidth: 1))
+//                    .textSelection(.enabled)
+            }
+//            .foregroundStyle(Color.pink)
+//            .background(Color.yellow)
         case .user:
             // User messages are right-aligned with blue background
             HStack {
@@ -52,7 +62,7 @@ struct MessageView: View {
                     Text(LocalizedStringKey(message.content))
                         .padding(.vertical, 8)
                         .padding(.horizontal, 12)
-                        .background(.tint, in: .rect(cornerRadius: 16))
+                        .background(Color.transparentAccent, in: .rect(cornerRadius: 16))
                         .textSelection(.enabled)
                 }
             }

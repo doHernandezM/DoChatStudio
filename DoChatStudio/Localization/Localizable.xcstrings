@@ -1,6 +1,15 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
+    "" : {
+
+    },
+    "--" : {
+
+    },
+    "%.2f%%" : {
+
+    },
     "%@" : {
 
     },
@@ -22,29 +31,28 @@
     "Active Memory Size" : {
 
     },
+    "Active:" : {
+
+    },
     "Cache" : {
 
     },
     "Cache Size" : {
 
     },
-    "Cache(Current/Limit): %@ / %@" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "Cache(Current/Limit): %1$@ / %2$@"
-          }
-        }
-      }
-    },
-    "Chat" : {
+    "Cancel" : {
 
     },
     "Choose a new model..." : {
 
     },
-    "Clear" : {
+    "Clear All" : {
+
+    },
+    "Clear Cache" : {
+
+    },
+    "Clear Chat" : {
 
     },
     "Controls creativity vs. determinism. Low Temperature (0.1-0.3) → For predictable, repetitive outputs. Low Temperature (0.1-0.3) → For predictable, repetitive outputs. High Temperature (1.2+) → For wild, unexpected responses:." : {
@@ -53,44 +61,64 @@
     "Controls the randomness of the generated text." : {
 
     },
+    "Current:" : {
+
+    },
+    "doChat" : {
+
+    },
     "Generate an unlimited number of tokens." : {
+
+    },
+    "Get Started" : {
 
     },
     "GPU" : {
 
     },
-    "GPU Memory(Active/Peak/Max): %@ / %@ / %@" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "GPU Memory(Active/Peak/Max): %1$@ / %2$@ / %3$@"
-          }
-        }
-      }
-    },
-    "Limit to " : {
+    "GPU Memory" : {
 
     },
-    "Model Configuration" : {
+    "Limit:" : {
 
     },
-    "Peformance" : {
+    "Memory Usage Chart" : {
+
+    },
+    "Model Is Generating" : {
+
+    },
+    "Models" : {
+
+    },
+    "Number of previous tokens checked for penalizing repetition. Increase when generating longer text, to avoid repetition over a wider span." : {
+
+    },
+    "Peak:" : {
 
     },
     "Penalizes repetition of tokens, reducing loops. Range: >1.0 to discourage repeating; <1.0 encourages repetition. When to adjust: Use around 1.1–1.2 for long-form content or dialogue to avoid stuttering." : {
 
     },
+    "Performance" : {
+
+    },
     "Prompt" : {
+
+    },
+    "Repetition Context Size: %.0f" : {
+
+    },
+    "Repetition Context Size: %.2f" : {
 
     },
     "Repetition Penalty: %.2f" : {
 
     },
-    "Select a Llama .GGUF file" : {
+    "Settings" : {
 
     },
-    "Size: " : {
+    "Stop Generation" : {
 
     },
     "Temperature: %.2f" : {
@@ -99,16 +127,31 @@
     "The max number of tokens that can be generated." : {
 
     },
+    "There is no memory usage data." : {
+
+    },
+    "This model is still generation. Are you sure you want to close it now?" : {
+
+    },
     "Time" : {
 
     },
-    "tokens." : {
+    "Tokens" : {
+
+    },
+    "Tokens per second:" : {
+
+    },
+    "Tokens:" : {
+
+    },
+    "Tokens: Unlimited" : {
 
     },
     "TopP: %.2f" : {
 
     },
-    "Unlimited Tokens" : {
+    "Use Unlimited Token" : {
 
     }
   },

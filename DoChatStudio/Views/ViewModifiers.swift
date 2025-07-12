@@ -29,10 +29,10 @@ struct DoStyle: ViewModifier {
         return LinearGradient(colors: [light, dark], startPoint: .bottomTrailing, endPoint: .topLeading)
     }
     
-    static func gradient(color: Color = .orange, transparent: Bool = false) -> LinearGradient {
+    static func gradient(color: Color = .orange, transparent: Bool = false, angle: (UnitPoint, UnitPoint) = (.bottomTrailing, .topLeading)) -> LinearGradient {
         let light = color.mix(with: transparent ? .black : .gray, by: 0.1)
         let dark = color.mix(with: .black, by: 0.2)
-        return LinearGradient(colors: [light, dark], startPoint: .bottomTrailing, endPoint: .topLeading)
+        return LinearGradient(colors: [light, dark], startPoint: angle.0, endPoint: angle.1)
     }
 }
 

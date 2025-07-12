@@ -52,6 +52,8 @@ class Message: Identifiable, Codable {
     /// Defines the role of the message sender in the conversation
     enum Role: Codable {
         /// Message from the user
+        case prompt
+        
         case user
         /// Message from the AI assistant
         case assistant
@@ -70,6 +72,9 @@ extension Message {
     /// - Returns: A new Message instance with user role
     static func user(_ content: String, images: [URL] = [], videos: [URL] = []) -> Message {
         Message(role: .user, content: content, images: images, videos: videos)
+    }
+    static func prompt(_ content: String, images: [URL] = [], videos: [URL] = []) -> Message {
+        Message(role: .prompt, content: content, images: images, videos: videos)
     }
 
     /// Creates an assistant message
