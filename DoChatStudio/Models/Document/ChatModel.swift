@@ -14,12 +14,14 @@ import UniformTypeIdentifiers
 /// Handles user input, message history, media attachments, and generation state.
 @Observable
 
-class ChatViewModel: ObservableObject, Codable, Identifiable {
+class ChatModel: ObservableObject, Codable, Identifiable {
     /// Service responsible for ML model operations
     private let mlxService: MLXService
     var finishedSize: Int64 = 0
 
-    var pm: PerformanceModel = PerformanceModel()
+    var viewData: ChatViewModelData
+    
+    var performance: PerformanceData = PerformanceData()
     
     let id: UUID
     
@@ -34,7 +36,7 @@ class ChatViewModel: ObservableObject, Codable, Identifiable {
     ]
     
     /// Currently selected language model for generation
-    var selectedModel: DoModel?// = MLXService.defaultModel
+    var model: DoModel?// = MLXService.defaultModel
     
     /// Manages image and video attachments for the current message
     var mediaSelection = MediaSelection()
@@ -58,38 +60,36 @@ class ChatViewModel: ObservableObject, Codable, Identifiable {
     
     /// Progress of the current model download, if any
     @MainActor var modelDownloadProgress: Progress? {
-        if selectedModel == nil {
+        if model == nil {
             return nil
         }
-        return selectedModel!.modelDownloadProgress
+        return model!.modelDownloadProgress
     }
-    //    @MainActor var modelFraction: Double? {
-    //            return mlxService.modelFraction
-    //    }
     
     /// Most recent error message, if any
     var errorMessage: String?
     
     
     init(mlxService: MLXService) {
+        viewData = ChatViewModelData()
         id = UUID()
         modelID = ""
-        selectedModel = MLXService.defaultModel
+        model = MLXService.defaultModel
         self.mlxService = mlxService
         
     }
     
     func takeMemorySnapshot() {
-        pm.gpuSnapshot.append(Snapshot(activeMemory: MLX.GPU.activeMemory, cacheMemory:MLX.GPU.cacheMemory, peakMemory: MLX.GPU.peakMemory))
-        pm.peakMemory = max(MLX.GPU.peakMemory, pm.peakMemory)
-        pm.activeMemory = MLX.GPU.activeMemory
+        performance.gpuSnapshots.append(Snapshot(activeMemory: MLX.GPU.activeMemory, cacheMemory:MLX.GPU.cacheMemory, peakMemory: MLX.GPU.peakMemory))
+        performance.peakMemory = max(MLX.GPU.peakMemory, performance.peakMemory)
+        performance.activeMemory = MLX.GPU.activeMemory
     }
     
     /// Generates response for the current prompt and media attachments
     func generate() async {
-        selectedModel?.state = .preparing
+        model?.state = .preparing
         takeMemorySnapshot()
-        if selectedModel == nil {return}
+        if model == nil {return}
         // Cancel any existing generation task
         if let existingTask = generateTask {
             existingTask.cancel()
@@ -97,7 +97,7 @@ class ChatViewModel: ObservableObject, Codable, Identifiable {
 
         }
         Task { @MainActor in
-            selectedModel?.state = .generating
+            model?.state = .generating
         }
         isGenerating = true
         
@@ -113,11 +113,11 @@ class ChatViewModel: ObservableObject, Codable, Identifiable {
             // Process generation chunks and update UI
             
             for await generation in try await mlxService.generate(
-                messages: messages, model: selectedModel!, parameters: generateParameters)
+                messages: messages, model: model!, parameters: generateParameters)
             {
-                if selectedModel == nil {return}
+                if model == nil {return}
                 takeMemorySnapshot()
-                pm.cacheLimit = MLX.GPU.cacheLimit
+                performance.cacheLimit = MLX.GPU.cacheLimit
                 //                pm.memoryLimit = MLX.GPU.memoryLimit
                 
                 switch generation {
@@ -135,7 +135,7 @@ class ChatViewModel: ObservableObject, Codable, Identifiable {
                 }
                 
                 takeMemorySnapshot()
-                selectedModel!.finishedSize = selectedModel!.calculateSize
+                model!.finishedSize = model!.calculateSize
             }
         }
         
@@ -145,7 +145,7 @@ class ChatViewModel: ObservableObject, Codable, Identifiable {
                 try await generateTask?.value
             } onCancel: {
                 Task { @MainActor in
-                    selectedModel?.state = .stopped
+                    model?.state = .stopped
 
                     generateTask?.cancel()
                     
@@ -157,10 +157,10 @@ class ChatViewModel: ObservableObject, Codable, Identifiable {
             }
         } catch {
             errorMessage = error.localizedDescription
-            selectedModel?.state = .error
+            model?.state = .error
         }
         
-        selectedModel?.state = .idle
+        model?.state = .idle
         
         isGenerating = false
         generateTask = nil
@@ -213,9 +213,9 @@ class ChatViewModel: ObservableObject, Codable, Identifiable {
         
         if options.contains(.meta) {
             generateCompletionInfo = nil
-            self.pm.gpuSnapshot = []
-            self.pm.peakMemory = 0
-            self.pm.activeMemory = 0
+            self.performance.gpuSnapshots = []
+            self.performance.peakMemory = 0
+            self.performance.activeMemory = 0
         }
                         
         if options.contains(.gpuCache) {
@@ -227,7 +227,7 @@ class ChatViewModel: ObservableObject, Codable, Identifiable {
     }
     
     private enum CodingKeys: String, CodingKey {
-        case id, modelID, prompt, messages, generateParameters, selectedModel, finishedSize
+        case chatViewModelData, id, modelID, prompt, messages, generateParameters, selectedModel, finishedSize
     }
     
     required init(from decoder: Decoder) throws {
@@ -238,23 +238,25 @@ class ChatViewModel: ObservableObject, Codable, Identifiable {
         messages          = try c.decode([Message].self, forKey: .messages)
         finishedSize = try c.decode(Int64.self, forKey: .finishedSize)
         generateParameters = try c.decode(GenerateParameters.self, forKey: .generateParameters)
+        viewData = try c.decode(ChatViewModelData.self, forKey: .chatViewModelData)
         
         self.mlxService = MLXService()
         
         let decodedModel = MLXService.availableModels.first { $0.configuration.name == modelID }
-        self.selectedModel = decodedModel
+        self.model = decodedModel
         
-        selectedModel?.finishedSize = finishedSize
+        model?.finishedSize = finishedSize
     }
     
     func encode(to encoder: Encoder) throws {
         var c = encoder.container(keyedBy: CodingKeys.self)
         try c.encode(id,                 forKey: .id)
-        try c.encodeIfPresent(selectedModel?.configuration.name, forKey: .modelID)
+        try c.encodeIfPresent(model?.configuration.name, forKey: .modelID)
         try c.encode(prompt,             forKey: .prompt)
         try c.encode(messages,           forKey: .messages)
         try c.encode(finishedSize, forKey: .finishedSize)
         try c.encode(generateParameters, forKey: .generateParameters)
+        try c.encode(viewData, forKey: .chatViewModelData)
         //    try c.encode(selectedModel.name, forKey: .selectedModel)
         
     }
@@ -306,3 +308,7 @@ struct ClearOption: RawRepresentable, OptionSet {
     static let gpuCache = ClearOption(rawValue: 1 << 3)
 }
 
+@Observable
+class ChatViewModelData: Codable {
+  var currentSelectedTab: Int = 0
+}

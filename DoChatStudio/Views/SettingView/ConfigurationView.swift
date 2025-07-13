@@ -8,24 +8,20 @@
 import SwiftUI
 import Charts
 
-struct ChatAdjustmentView: View {
+struct ConfigurationView: View {
     /// View model that manages the chat state and business logic
-    @Bindable private var vm: ChatViewModel
+    @Bindable private var vm: ChatModel
     
     /// Initializes the chat view with a view model
     /// - Parameter viewModel: The view model to manage chat state
-    init(viewModel: ChatViewModel) {
+    init(viewModel: ChatModel) {
         self.vm = viewModel
     }
     
     
 
     var body: some View {
-        VStack {
-            
-            ScrollView(.vertical, content: {
                 VStack{
-                    //Max Tokens
                     
                     DisclosureGroup(content:{
                         Toggle(isOn: Binding<Bool>(
@@ -107,8 +103,9 @@ struct ChatAdjustmentView: View {
                     
                     VStack(alignment: .leading) {
                         HStack{
-                            Image(systemName:"chart.bar.fill", variableValue:Double(vm.generateParameters.topP))
-                                .foregroundStyle(Color.transparentAccent)
+                            Image(systemName:"chart.bar.xaxis.ascending", variableValue:Double(vm.generateParameters.topP))
+                                .symbolRenderingMode(.palette)
+                                .foregroundStyle(Color.accentColor, .blue)
                                 .font(.system(.largeTitle))
                             Text("TopP: \(vm.generateParameters.topP, specifier: "%.2f")")
                         }
@@ -207,25 +204,11 @@ struct ChatAdjustmentView: View {
                         
                     }
                     .help(Text("Number of previous tokens checked for penalizing repetition. Increase when generating longer text, to avoid repetition over a wider span."))
-                    
-//                    Divider().foregroundColor(.transparentAccent.opacity(1.0))
-                    
+                    Spacer()
                 }
-                
-//                .padding()
-            })
-            //        .padding(5)
-        }
-//        .background(content: {
-//            RoundedRectangle(cornerRadius: CGFloat(3))
-//                .stroke(Color.transparentAccent.opacity(0.25), lineWidth: 1.0)
-//        })
-//        .border(.teal, width: 1.0)
-        .padding()
-        
     }
 }
 
 #Preview {
-    ChatAdjustmentView(viewModel: ChatViewModel(mlxService: MLXService()))
+    ConfigurationView(viewModel: ChatModel(mlxService: MLXService()))
 }

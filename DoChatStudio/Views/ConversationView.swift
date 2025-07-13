@@ -47,7 +47,9 @@ struct ConversationView: View {
                     
                 )
                 .onHover { _ in
+                    #if os(macOS)
                     NSCursor.iBeam.push()
+                    #endif
                 }
             } else {
                 EmptyView()

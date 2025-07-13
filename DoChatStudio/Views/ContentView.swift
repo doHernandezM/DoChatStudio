@@ -37,7 +37,11 @@ struct ContentView: View {
     }
     
     
-    init(nav: NavigationSplitViewVisibility = .all, document: DoChatStudioDocument, url: URL?) {
+    init(
+        nav: NavigationSplitViewVisibility = .all,
+        document: DoChatStudioDocument,
+        url: URL?
+    ) {
         self.nav = nav
         self.document = document
         
@@ -49,66 +53,75 @@ struct ContentView: View {
     var body: some View {
         
         
-        if let model = document.chatModel {
+        if let model = document.chat {
             Group {
                 NavigationSplitView(sidebar: {
-                        VStack{
-                            SidebarTabView(currentTab: Binding<Int>(
-                                get:{currentTab},
-                                set:{newValue in
-                                    currentTab = newValue}
-                            ), vm: Binding<ChatViewModel>(
-                                get:{model},
-                                set:{newValue in
-                                    document.chatModel = newValue}
-                            ))
-//                            .background(
-//                                Rectangle()
-//                                    .fill(DoStyle.gradient(color: Color.accentColor.mix(with: .black, by: 0.05).opacity(0.25),angle: (.top,.bottom)))
-//                            )
-
-                            SidebarTabGroupView(currentTab: Binding<Int>(
-                                get:{currentTab},
-                                set:{newValue in
-                                    currentTab = newValue}
-                            ), vm: Binding<ChatViewModel>(
-                                get:{model},
-                                set:{newValue in
-                                    document.chatModel = newValue}
-                            ))
-                        }
-                    
+                    VStack{
+                        SidebarTabView(vm: Binding<ChatModel>(
+                            get:{model},
+                            set:{newValue in
+                                document.chat = newValue}
+                        ))
+                        
+                        SidebarTabGroupView(vm: Binding<ChatModel>(
+                            get:{model},
+                            set:{newValue in
+                                document.chat = newValue}
+                        ))
+                    }
                 }, detail: {
-                    ChatView(viewModel: model, currentTab: currentTab)
-                        .toolbar(content: {
-                            ToolbarItemGroup(content: {
-                                ToolbarSelectedModelView(vm: document.chatModel!)
-                            })
-                            ToolbarItemGroup(content: {
-                                ToolbarButtonsView(vm: document.chatModel!)
-                            })
-                        })
-                        .padding()
+                    ChatView(viewModel: model)
+                        .padding(8)
+                        .toolbar(id: "mainToolBar"){
+                            ToolbarItem(id:"clearChat") {
+                                Button(action: {model.clear([.chat])}){
+                                    VStack{
+                                        Image(systemName: "bubble.fill")
+                                            .symbolRenderingMode(.palette)
+                                            .foregroundStyle(Color.accentColor)
+                                            .font(.system(.title3))
+                                            .overlay(alignment: .topTrailing, content: {
+                                                Image(systemName: "xmark.circle.fill")
+                                                    .symbolRenderingMode(.palette)
+                                                    .foregroundStyle(Color.white, Color.red)
+                                                    .font(.system(.caption))
+
+                                            })
+                                        Text("Clear Chat").font(.system(.caption))
+                                    }
+                                    .frame(maxHeight: .infinity)
+                                }
+                                .buttonStyle(.plain)
+                                .padding()
+                            }
+                            
+                        }
                 })
                 .environmentObject(document)
 #if os(macOS)
-                .dismissalConfirmationDialog("Model Is Generating", shouldPresent: document.blockTermination, actions: {
-                    
-                    /// A destructive button that appears in red.
-                    Button(role: .destructive) {
-                        document.chatModel?.cancelGeneration()
-                    } label: {
-                        Text("Stop Generation")
-                    }
-                    
-                    /// A cancellation button that appears with bold text.
-                    Button("Cancel", role: .cancel) {
-                        // Perform cancellation
-                    }
-                    
-                }, message: {
-                    Text("This model is still generation. Are you sure you want to close it now?")
-                })
+                .dismissalConfirmationDialog(
+                    "Model Is Generating",
+                    shouldPresent: document.blockTermination,
+                    actions: {
+                        
+                        /// A destructive button that appears in red.
+                        Button(role: .destructive) {
+                            document.chat?.cancelGeneration()
+                        } label: {
+                            Text("Stop Generation")
+                        }
+                        
+                        /// A cancellation button that appears with bold text.
+                        Button("Cancel", role: .cancel) {
+                            // Perform cancellation
+                        }
+                        
+                    },
+                    message: {
+                        Text(
+                            "This model is still generation. Are you sure you want to close it now?"
+                        )
+                    })
 #endif
             }
         } else {
@@ -178,7 +191,7 @@ struct ContentView: View {
     {
         //         let model = ChatViewModel(mlxService: MLXService())
         var document = DoChatStudioDocument(text: "Chat")
-        //         document.chatModel = model
+        //         document.chat = model
         return ContentView(document: document, url: nil)
     }()
 }
@@ -258,10 +271,28 @@ struct SideT: InsettableShape {
             path.move(to: CGPoint(x: rect.maxX, y: rect.maxY))
             path.addLine(to: CGPoint(x: rect.maxX, y: rect.minY))
             path.addLine(to: CGPoint(x: rect.maxX - thickness, y: rect.minY))
-            path.addLine(to: CGPoint(x: rect.maxX - thickness, y: rect.midY - (thickness / 2)))
-            path.addLine(to: CGPoint(x: rect.minX, y: rect.midY - (thickness / 2)))
-            path.addLine(to: CGPoint(x: rect.minX, y: rect.midY + (thickness / 2)))
-            path.addLine(to: CGPoint(x: rect.maxX - thickness, y: rect.midY + (thickness / 2)))
+            path
+                .addLine(
+                    to: CGPoint(
+                        x: rect.maxX - thickness,
+                        y: rect.midY - (thickness / 2)
+                    )
+                )
+            path
+                .addLine(
+                    to: CGPoint(x: rect.minX, y: rect.midY - (thickness / 2))
+                )
+            path
+                .addLine(
+                    to: CGPoint(x: rect.minX, y: rect.midY + (thickness / 2))
+                )
+            path
+                .addLine(
+                    to: CGPoint(
+                        x: rect.maxX - thickness,
+                        y: rect.midY + (thickness / 2)
+                    )
+                )
             path.addLine(to: CGPoint(x: rect.maxX - thickness, y: rect.maxY))
             path.closeSubpath()
             
@@ -278,84 +309,105 @@ struct SideT: InsettableShape {
 
 
 struct SidebarTabView: View {
-    @Binding var currentTab: Int
-    @Binding var vm: ChatViewModel
+    //    @Binding var currentTab: Int
+    @Binding var vm: ChatModel
     @State var size: CGSize = .zero
     
     var body: some View {
-            HStack(alignment: .bottom){
-                Button {
-                    currentTab = 0
-                } label: {
-                    VStack{
-                            Image(systemName: "book.circle")
-                                .font(.system(.title2))
-                            Text("Models")
-                    }
-                    .foregroundStyle(currentTab == 0 ? Color.secondary : Color.primary)
-                    .contentShape(RoundedRectangle(cornerRadius: 5)) // Defines tappable area
+        HStack(alignment: .bottom){
+            Button {
+                vm.viewData.currentSelectedTab = 0
+            } label: {
+                VStack{
+                    Image(systemName: "book.circle")
+                        .font(.system(.title2))
+                    Text("Models")
                 }
-                
-                .background(
-                    RoundedRectangle(cornerRadius: 5.0)
-                        .fill(DoStyle.gradient(color: Color.accentColor.mix(with: .black, by: 0.05).opacity(0.25), angle: (.bottom,.top)))
-                        .opacity(currentTab == 0 ? 1.0 : 0.0)
+                .foregroundStyle(
+                    vm.viewData.currentSelectedTab == 0 ? Color.accentColor : Color.primary
                 )
-                .overlay(content: {
-                    RoundedRectangle(cornerRadius: 5.0)
-                        .fill(Color.clear)
-                        .stroke(DoStyle.gradient(color:Color.accentColor.mix(with: .black, by: 0.05).opacity(0.25), angle: (.top,.bottom)), style: StrokeStyle(lineWidth: 4.0))
-                        .shadow(radius: 2)
-                        .opacity(currentTab == 0 ? 1.0 : 0.0)
-                })
-                
-                Button {
-                    currentTab = 1
-                } label: {
-                    VStack{
-                        Image(systemName: "gear")
-                            .font(.system(.title2))
-                        Text("Settings")
-                    }
-                    .foregroundStyle(currentTab == 1 ? Color.accentColor : Color.primary)
-                    .contentShape(RoundedRectangle(cornerRadius: 5)) // Defines tappable area
-
+                .contentShape(
+                    RoundedRectangle(cornerRadius: 5)
+                ) // Defines tappable area
+            }
+            
+            
+            Button {
+                vm.viewData.currentSelectedTab = 1
+            } label: {
+                VStack{
+                    Image(systemName: "gear")
+                        .font(.system(.title2))
+                    Text("Settings")
                 }
-                
-                Button {
-                    currentTab = 2
-                } label: {
-                    VStack{
-                        Image(systemName: "gauge.with.needle")
-                            .font(.system(.title2))
-                        Text("Performance")
-                    }
-                    .foregroundStyle(currentTab == 2 ? Color.accentColor : Color.primary)
-                    .contentShape(RoundedRectangle(cornerRadius: 5)) // Defines tappable area
-                }
-                
+                .foregroundStyle(
+                    vm.viewData.currentSelectedTab == 1 ? Color.accentColor : Color.primary
+                )
+                .contentShape(
+                    RoundedRectangle(cornerRadius: 5)
+                ) // Defines tappable area
                 
             }
-            .buttonStyle(.plain)
-            .frame(maxWidth: .infinity)
+            
+            Button {
+                vm.viewData.currentSelectedTab = 2
+            } label: {
+                VStack{
+                    Image(systemName: "gauge.with.needle")
+                        .font(.system(.title2))
+                    Text("Performance")
+                }
+                .foregroundStyle(
+                    vm.viewData.currentSelectedTab == 2 ? Color.accentColor : Color.primary
+                )
+                .contentShape(
+                    RoundedRectangle(cornerRadius: 5)
+                ) // Defines tappable area
+            }
+            
+            
+        }
+        .buttonStyle(.plain)
+        .frame(maxWidth: .infinity)
     }
 }
 
 struct SidebarTabGroupView: View {
-    @Binding var currentTab: Int
-    @Binding var vm: ChatViewModel
+    //    @Binding var currentTab: Int
+    @Binding var vm: ChatModel
     
     var body: some View {
         ZStack {
-            
-            switch currentTab {
-            case 1:
-                ChatAdjustmentView(viewModel: vm)
-            case 2:
-                PerformanceView(viewModel: vm)
-            default:
-                ModelListCell(vm: vm)
-            }
+            ScrollView(.vertical, content: {
+                LazyVStack(pinnedViews: [.sectionFooters]){
+                    Section() {
+                        
+                        switch vm.viewData.currentSelectedTab {
+                        case 1:
+                            ConfigurationView(viewModel: vm)
+                                .padding()
+                        case 2:
+                            PerformanceView(viewModel: vm)
+                                .padding()
+                        default:
+                            ModelsListView(vm: vm)
+                        }
+                    } footer: {
+                        
+                        ModelListView(selectedModel: Binding<DoModel?>(
+                            get: {
+                                vm.model
+                            },
+                            set: { _ in }))
+                        .padding()
+                        .frame(maxWidth: .infinity)
+                        .background(.ultraThinMaterial, in: Rectangle())
+
+                    }
+                }
+            })
+            .scrollContentBackground(.hidden)
+
         }
         .frame(minWidth: 44 * 6)
     }

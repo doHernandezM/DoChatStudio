@@ -27,10 +27,6 @@ class DoModel {
     
     var name: String
     
-    //    let action: (_ progress:Progress, _ model:DoModel) -> () = { progress, model in
-    //        model.state = .downloading
-    //    }
-    
     ///Current model of the state
     var state: ModelState? = nil
     

@@ -13,14 +13,12 @@ import SwiftUI
 /// Displays messages, handles media attachments, and provides input controls.
 struct ChatView: View {
     /// View model that manages the chat state and business logic
-    @Bindable private var vm: ChatViewModel
-    @State var currentTab: Int
+    @Bindable private var vm: ChatModel
     
     /// Initializes the chat view with a view model
     /// - Parameter viewModel: The view model to manage chat state
-    init(viewModel: ChatViewModel, currentTab: Int) {
+    init(viewModel: ChatModel) {
         self.vm = viewModel
-        self.currentTab = currentTab
     }
     
     var body: some View {
@@ -40,11 +38,10 @@ struct ChatView: View {
                 PromptField(
                     prompt: $vm.prompt, 
                     sendButtonAction: {
-                        self.currentTab = 2
                         await vm.generate()
                     },
                     // Only show media button for vision-capable models
-                    mediaButtonAction: vm.selectedModel?.isVisionModel ?? false
+                    mediaButtonAction: vm.model?.isVisionModel ?? false
                     ? {
                         vm.mediaSelection.isShowing = true
                     } : nil
@@ -72,7 +69,7 @@ struct ChatView: View {
 }
 
 #Preview {
-    ChatView(viewModel: ChatViewModel(mlxService: MLXService()), currentTab: 0)
+    ChatView(viewModel: ChatModel(mlxService: MLXService()))
 }
 
 

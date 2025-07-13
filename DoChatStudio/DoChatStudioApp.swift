@@ -28,6 +28,7 @@ struct DoChatStudioApp: App {
         DocumentGroup(newDocument: DoChatStudioDocument(text: "")) { file in
             ContentView(document: file.document, url: file.fileURL)
         }
+//        .windowToolbarStyle(.unified)
 #else
         DocumentGroup(newDocument: DoChatStudioDocument(text: "")) { file in
             ContentView(document: file.document, url: file.fileURL)

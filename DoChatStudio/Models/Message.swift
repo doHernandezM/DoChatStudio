@@ -117,6 +117,18 @@ extension GenerateCompletionInfo: Codable {
     
     }
     
+    var generationTime: String {
+        let formatter = DateComponentsFormatter()
+        formatter.maximumUnitCount = 2
+        formatter.unitsStyle = .abbreviated
+        formatter.zeroFormattingBehavior = .dropAll
+//        formatter.allowsFractionalUnits = false
+        formatter.allowedUnits = [.day, .hour, .minute, .second]
+        
+        let string = formatter.string(from: self.generateTime)
+        return string ?? ""
+    }
+    
 //    public let promptTokenCount: Int
 //    public let generationTokenCount: Int
 //    public let promptTime: TimeInterval

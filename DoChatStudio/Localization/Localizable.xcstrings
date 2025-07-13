@@ -46,9 +46,6 @@
     "Choose a new model..." : {
 
     },
-    "Clear All" : {
-
-    },
     "Clear Cache" : {
 
     },
@@ -68,6 +65,15 @@
 
     },
     "Generate an unlimited number of tokens." : {
+
+    },
+    "Generated Prompt Tokens:" : {
+
+    },
+    "Generated Tokens:" : {
+
+    },
+    "Generation Time:" : {
 
     },
     "Get Started" : {

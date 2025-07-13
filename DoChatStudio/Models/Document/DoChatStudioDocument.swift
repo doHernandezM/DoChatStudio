@@ -15,18 +15,17 @@ class DoChatStudioDocument: FileDocument, ObservableObject {
             }
         }
     }
+    
     @Published var urlExists: Bool = false
     var urlLoadError: Bool = false
     
     var blockTermination: Bool {
         get {
-            return self.chatModel?.isGenerating ?? false
+            return self.chat?.isGenerating ?? false
         }
     }
     
-    @Published var chatModel: ChatViewModel? = nil /*{
-                                                    willSet { objectWillChange.send() }
-                                                    }*/
+    @Published var chat: ChatModel? = nil
     
     @Published var locked: Bool = false
     @Published var password: Bool = false
@@ -40,14 +39,9 @@ class DoChatStudioDocument: FileDocument, ObservableObject {
     
     init(text: String) {
         self.id = UUID()
-        let model = ChatViewModel(mlxService: MLXService())
+        let model = ChatModel(mlxService: MLXService())
         
-//        Task {
-//            await MainActor.run {
-                self.chatModel = model
-//            }
-//        }
-//        addSelfToAppDocument()
+                self.chat = model
     }
     
     
@@ -66,7 +60,7 @@ class DoChatStudioDocument: FileDocument, ObservableObject {
             if self.url == nil {
                 self.url = decoded.url
             }
-            self.chatModel = decoded.chatModel
+            self.chat = decoded.chatModel
         }
         addSelfToAppDocument()
     }
@@ -97,15 +91,15 @@ class DoChatStudioDocument: FileDocument, ObservableObject {
         
         var documentData: DocumentData? = nil
         
-        if self.chatModel == nil {
-                self.chatModel = ChatViewModel(mlxService: MLXService())
+        if self.chat == nil {
+                self.chat = ChatModel(mlxService: MLXService())
         }
         
-        if self.chatModel == nil {
-            throw DocumentError.noData("chatModel == nil")
+        if self.chat == nil {
+            throw DocumentError.noData("chat == nil")
         }
         
-        documentData = DocumentData(url: self.url, chatModel: self.chatModel!, locked: self.locked, password: self.password, id: self.id)
+        documentData = DocumentData(url: self.url, chatModel: self.chat!, locked: self.locked, password: self.password, id: self.id)
         
         if documentData == nil {
             throw DocumentError.noData("documentData == nil")
@@ -131,7 +125,7 @@ class DoChatStudioDocument: FileDocument, ObservableObject {
             //                 2️⃣ Manually encode your DocumentData
             let documentData = DocumentData(
                 url: self.url,
-                chatModel: self.chatModel ?? ChatViewModel(mlxService: MLXService()),
+                chatModel: self.chat ?? ChatModel(mlxService: MLXService()),
                 locked: self.locked,
                 password: self.password,
                 id: self.id
@@ -156,7 +150,7 @@ class DoChatStudioDocument: FileDocument, ObservableObject {
 private class DocumentData: Codable {
     var url: URL?
     
-    var chatModel: ChatViewModel
+    var chatModel: ChatModel
     var locked: Bool
     var password: Bool
     var id: UUID
@@ -168,7 +162,7 @@ private class DocumentData: Codable {
         case role, content
     }
     
-    init(url: URL?, chatModel:ChatViewModel, locked: Bool, password: Bool, id: UUID) {
+    init(url: URL?, chatModel:ChatModel, locked: Bool, password: Bool, id: UUID) {
         self.url = url
         self.chatModel = chatModel
         self.locked = locked
@@ -188,7 +182,7 @@ private class DocumentData: Codable {
         
         
         
-        self.chatModel = try c.decodeIfPresent(ChatViewModel.self, forKey: .chatModel) ?? ChatViewModel(mlxService: MLXService())
+        self.chatModel = try c.decodeIfPresent(ChatModel.self, forKey: .chatModel) ?? ChatModel(mlxService: MLXService())
         
         
     }

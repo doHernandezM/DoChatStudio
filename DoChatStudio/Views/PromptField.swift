@@ -18,12 +18,12 @@ struct PromptField: View {
     let mediaButtonAction: (() -> Void)?
 
     fileprivate func startGeneration() {
-        withAnimation(.linear(duration: 1)) {
+        withAnimation(.linear(duration: 1/5)) {
+            document.chat?.viewData.currentSelectedTab = 2
             dashPhase = 0
             if isRunning {
                 task?.cancel()
                 removeTask()
-                
             } else {
                 task = Task {
                     await sendButtonAction()
@@ -58,9 +58,9 @@ struct PromptField: View {
             
             LinearGradient(
                 colors: [
-                    (document.chatModel?.selectedModel?.state?.color ?? .accentColor).opacity(0.4),
+                    (document.chat?.model?.state?.color ?? .accentColor).opacity(0.4),
                     .transparentAccent.mix(with: .white, by: 0.25).opacity(0.4),
-                    (document.chatModel?.selectedModel?.state?.color ?? .accentColor).opacity(0.4)],
+                    (document.chat?.model?.state?.color ?? .accentColor).opacity(0.4)],
                 startPoint: startPoint,
                 endPoint: endPoint
                 
@@ -87,6 +87,9 @@ struct PromptField: View {
                     Image(systemName: "photo.badge.plus")
                         .shadow(color: .black, radius: 2.0)
                         .frame(width:36, height: 36)
+                        .font(.system(.title3))
+                        .symbolRenderingMode(.palette)
+                        .foregroundStyle(Color.green, Color.primary)
                         .background(Circle().fill(DoStyle.gradient(color: .accentColor.mix(with: .black, by: 0.05).opacity(0.25))))
                         .overlay(
                             Circle()
@@ -124,11 +127,13 @@ struct PromptField: View {
                 Image(systemName: isRunning == false ? "play.fill" : "stop.fill")
                     .shadow(color: .black, radius: 2.0)
                     .frame(width:36, height: 36)
-                    .background(Circle().fill(DoStyle.gradient(color: (document.chatModel?.selectedModel?.state?.color ?? .accentColor).mix(with: .black, by: 0.05).opacity(0.25))))
+                    .font(.system(.title3))
+                    .foregroundStyle(Color.primary)
+                    .background(Circle().fill(DoStyle.gradient(color: (document.chat?.model?.state?.color ?? .accentColor).mix(with: .black, by: 0.05).opacity(0.25))))
                     .overlay(
                         Circle()
                             .fill(Color.clear)
-                            .stroke(isRunning ? gradient : DoStyle.gradient(color: (document.chatModel?.selectedModel?.state?.color ?? .accentColor).mix(with: .black, by: 0.05).opacity(0.5)), style: strokeStyle)
+                            .stroke(isRunning ? gradient : DoStyle.gradient(color: (document.chat?.model?.state?.color ?? .accentColor).mix(with: .black, by: 0.05).opacity(0.5)), style: strokeStyle)
                             .shadow(radius: 2)
                             .rotationEffect(Angle(degrees: 180))
                     )
@@ -136,7 +141,7 @@ struct PromptField: View {
             .buttonStyle(.plain)
             .keyboardShortcut(isRunning ? .cancelAction : .defaultAction)
         }
-        .disabled(document.chatModel?.selectedModel?.modelDownloadProgress != nil)
+        .disabled(document.chat?.model?.modelDownloadProgress != nil)
         .ignoresSafeArea(.container)
         .onReceive(timer) { _ in
             withAnimation(.linear(duration: 1/4)) {

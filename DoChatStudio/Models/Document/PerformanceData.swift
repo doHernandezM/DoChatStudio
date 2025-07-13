@@ -9,7 +9,7 @@ import MLX
 import MLXLMCommon
 
 @Observable
-class PerformanceModel: ObservableObject, Codable, Identifiable {
+class PerformanceData: ObservableObject, Codable, Identifiable {
     
     var id: UUID = UUID()
     
@@ -18,7 +18,7 @@ class PerformanceModel: ObservableObject, Codable, Identifiable {
     var cacheLimit: Int = 0
     var peakMemory: Int = 0
     
-    var gpuSnapshot: [Snapshot] = []
+    var gpuSnapshots: [Snapshot] = []
     
 }
 

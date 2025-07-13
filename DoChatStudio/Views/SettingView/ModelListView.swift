@@ -22,11 +22,13 @@ struct ModelListView: View {
         
         HStack{
             
-            VStack{
+            VStack(alignment: .leading){
                 
                 HStack{
-                    Text(selectedModel != nil ? "\(selectedModel!.displayName)" : "Choose a new model...").font(.title3)
-                    Spacer()
+                    Text(selectedModel != nil ? "\(selectedModel!.displayName)" : "Choose a new model...")
+                        .foregroundStyle(.primary)
+//                        .fixedSize()
+//                    Spacer()
                 }
                 HStack{
                     if selectedModel?.size ?? 0 > 0 {
