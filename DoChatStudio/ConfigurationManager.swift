@@ -16,24 +16,35 @@ enum DebugLevel {
 var kDebugMode: DebugLevel? = DebugLevel.minimal
 
 
-class ConfigurationManager {
+class ConfigurationManager: ObservableObject {
     static let shared = ConfigurationManager()
     
     private let fileManager = FileManager.default
     
     let modelController = FileController(folderName: "Models")
-
+    
     private let appDir: URL
-
+    
     @Published var models: [URL] = []
+    
+    @Published
+    var showBanner:Bool = false
+    @Published
+    var bannerTitle:String = ""
+    @Published
+    var bannerDescription:String = ""
+    
+    static let userDefaults = UserDefaults()
+    
     
     init() {
         let appSupportDir = fileManager.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
         appDir = appSupportDir.appendingPathComponent("doChatStudio", isDirectory: true)
         try? fileManager.createDirectory(at: appDir, withIntermediateDirectories: true)
         
+
         reloadModels()
-       
+        
     }
     
     func reloadModels() {

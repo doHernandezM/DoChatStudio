@@ -18,14 +18,15 @@ class DoChatStudioDocument: FileDocument, ObservableObject {
     
     @Published var urlExists: Bool = false
     var urlLoadError: Bool = false
+    var saveTrigger: Bool = false
     
     var blockTermination: Bool {
         get {
-            return self.chat?.isGenerating ?? false
+            return self.chat.isGenerating
         }
     }
     
-    @Published var chat: ChatModel? = nil
+    @Published var chat: ChatModel = ChatModel(mlxService: MLXService())
     
     @Published var locked: Bool = false
     @Published var password: Bool = false
@@ -39,9 +40,7 @@ class DoChatStudioDocument: FileDocument, ObservableObject {
     
     init(text: String) {
         self.id = UUID()
-        let model = ChatModel(mlxService: MLXService())
-        
-                self.chat = model
+//        self.chat = ChatModel(mlxService: MLXService())
     }
     
     
@@ -91,15 +90,15 @@ class DoChatStudioDocument: FileDocument, ObservableObject {
         
         var documentData: DocumentData? = nil
         
-        if self.chat == nil {
-                self.chat = ChatModel(mlxService: MLXService())
-        }
+//        if self.chat == nil {
+//                self.chat = ChatModel(mlxService: MLXService())
+//        }
+//        
+//        if self.chat == nil {
+//            throw DocumentError.noData("chat == nil")
+//        }
         
-        if self.chat == nil {
-            throw DocumentError.noData("chat == nil")
-        }
-        
-        documentData = DocumentData(url: self.url, chatModel: self.chat!, locked: self.locked, password: self.password, id: self.id)
+        documentData = DocumentData(url: self.url, chatModel: self.chat, locked: self.locked, password: self.password, id: self.id)
         
         if documentData == nil {
             throw DocumentError.noData("documentData == nil")
@@ -125,7 +124,7 @@ class DoChatStudioDocument: FileDocument, ObservableObject {
             //                 2️⃣ Manually encode your DocumentData
             let documentData = DocumentData(
                 url: self.url,
-                chatModel: self.chat ?? ChatModel(mlxService: MLXService()),
+                chatModel: self.chat,
                 locked: self.locked,
                 password: self.password,
                 id: self.id

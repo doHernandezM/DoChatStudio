@@ -31,9 +31,30 @@ class Message: Identifiable, Codable {
     /// Timestamp when the message was created
     let timestamp: Date
     
-    var generationInfo: GenerateCompletionInfo? = nil
+    var timeStampString: String
+    
+    var generationInfo: GenerateCompletionInfo? = nil {
+        didSet {
+            self.timeStampString = {
+                let dateFormatterStart = DateFormatter()
+                dateFormatterStart.dateStyle = .short
+                dateFormatterStart.timeStyle = .medium
+                let dateFormatterEnd = DateFormatter()
+                dateFormatterEnd.dateStyle = .none
+                dateFormatterEnd.timeStyle = .medium
+                
+                if generationInfo == nil {
+                    return dateFormatterStart.string(from: timestamp)
+                }
+                let generationTime = generationInfo!.generateTime + generationInfo!.promptTime
+                return "\(dateFormatterStart.string(from: timestamp)) - \(dateFormatterEnd.string(from: timestamp.addingTimeInterval(generationTime)))"
+            
+            }()
+        }
+    }
 
-
+    var modelState: ModelState? = nil
+    
     /// Creates a new message with the specified role, content, and optional media attachments
     /// - Parameters:
     ///   - role: The role of the message sender
@@ -47,6 +68,13 @@ class Message: Identifiable, Codable {
         self.images = images
         self.videos = videos
         self.timestamp = .now
+        self.timeStampString = {
+            let dateFormatter = DateFormatter()
+            dateFormatter.dateStyle = .short
+            dateFormatter.timeStyle = .medium
+            return dateFormatter.string(from: .now)
+        
+        }()
     }
 
     /// Defines the role of the message sender in the conversation
@@ -128,6 +156,29 @@ extension GenerateCompletionInfo: Codable {
         let string = formatter.string(from: self.generateTime)
         return string ?? ""
     }
+
+    var promptGenerationTime: String {
+        let formatter = DateComponentsFormatter()
+        formatter.maximumUnitCount = 2
+        formatter.unitsStyle = .abbreviated
+        formatter.zeroFormattingBehavior = .dropAll
+//        formatter.allowsFractionalUnits = false
+        formatter.allowedUnits = [.day, .hour, .minute, .second]
+        
+        let string = formatter.string(from: self.promptTime)
+        return string ?? ""
+    }
+    
+    var summarize: String {
+        get {
+        """
+        Tokens: In:\(promptTokenCount), Out: \(generationTokenCount)
+        Tokens per Second: In \(promptTokensPerSecond.formatted()) Out: \(generationTokenCount)
+        Total \(tokensPerSecond.formatted()) tokens per second, Time:\(generateTime.formatted())s
+        """
+        }
+    }
+    
     
 //    public let promptTokenCount: Int
 //    public let generationTokenCount: Int
@@ -135,3 +186,4 @@ extension GenerateCompletionInfo: Codable {
 //    public let generateTime: TimeInterval
 //        
 }
+

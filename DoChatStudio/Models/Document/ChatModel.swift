@@ -9,6 +9,9 @@ import Foundation
 import MLX
 import MLXLMCommon
 import UniformTypeIdentifiers
+#if canImport(AppKit)
+import AppKit
+#endif
 
 /// ViewModel that manages the chat interface and coordinates with MLXService for text generation.
 /// Handles user input, message history, media attachments, and generation state.
@@ -19,9 +22,9 @@ class ChatModel: ObservableObject, Codable, Identifiable {
     private let mlxService: MLXService
     var finishedSize: Int64 = 0
 
-    var viewData: ChatViewModelData
+    var style: StyleModel
     
-    var performance: PerformanceData = PerformanceData()
+    var performance: PerformanceModel = PerformanceModel()
     
     let id: UUID
     
@@ -36,7 +39,7 @@ class ChatModel: ObservableObject, Codable, Identifiable {
     ]
     
     /// Currently selected language model for generation
-    var model: DoModel?// = MLXService.defaultModel
+    var model: ModelModel?// = MLXService.defaultModel
     
     /// Manages image and video attachments for the current message
     var mediaSelection = MediaSelection()
@@ -45,7 +48,7 @@ class ChatModel: ObservableObject, Codable, Identifiable {
     var isGenerating = false
     
     ///
-    var generateParameters = GenerateParameters()
+    var generateParameters: GenerateParameters = GenerateParameters()
     
     /// Current generation task, used for cancellation
     private var generateTask: Task<Void, any Error>?
@@ -69,49 +72,77 @@ class ChatModel: ObservableObject, Codable, Identifiable {
     /// Most recent error message, if any
     var errorMessage: String?
     
+    /// Rate limiting for memory snapshots (no more than 4 times per second)
+    private var lastMemorySnapshotTime: TimeInterval = 0
+    
     
     init(mlxService: MLXService) {
-        viewData = ChatViewModelData()
+        style = StyleModel()
         id = UUID()
         modelID = ""
         model = MLXService.defaultModel
         self.mlxService = mlxService
-        
     }
     
     func takeMemorySnapshot() {
-        performance.gpuSnapshots.append(Snapshot(activeMemory: MLX.GPU.activeMemory, cacheMemory:MLX.GPU.cacheMemory, peakMemory: MLX.GPU.peakMemory))
+    #if targetEnvironment(simulator)
+        // Simulator does not support MLX GPU metrics; skip to avoid crashes.
+        return
+    #else
+        // Rate limit to no more than 4 times per second
+        let now = Date().timeIntervalSinceReferenceDate
+        let minInterval: TimeInterval = 0.25
+        if now - lastMemorySnapshotTime < minInterval {
+            return
+        }
+        lastMemorySnapshotTime = now
+
+        let snapshot = Snapshot(activeMemory: MLX.GPU.activeMemory, cacheMemory: MLX.GPU.cacheMemory, peakMemory: MLX.GPU.peakMemory)
+        performance.gpuSnapshots.append(snapshot)
         performance.peakMemory = max(MLX.GPU.peakMemory, performance.peakMemory)
         performance.activeMemory = MLX.GPU.activeMemory
+    #endif
     }
     
     /// Generates response for the current prompt and media attachments
     func generate() async {
-        model?.state = .preparing
+        
+#if targetEnvironment(simulator)
+    // Simulator does not support MLX GPU metrics; skip to avoid crashes.
+    return
+#endif
+        await MainActor.run {
+            model?.state = .preparing
+            messages.last?.modelState = .preparing
+        }
+        
         takeMemorySnapshot()
         if model == nil {return}
         // Cancel any existing generation task
         if let existingTask = generateTask {
             existingTask.cancel()
             generateTask = nil
-
         }
-        Task { @MainActor in
-            model?.state = .generating
-        }
-        isGenerating = true
         
         // Add user message with any media attachments
         messages.append(.user(prompt, images: mediaSelection.images, videos: mediaSelection.videos))
+        
+
+        isGenerating = true
+        
         // Add empty assistant message that will be filled during generation
         messages.append(.assistant(""))
         
         // Clear the input after sending
         clear(.prompt)
         
+        
         generateTask = Task {
             // Process generation chunks and update UI
+            var lastFlush = Date.timeIntervalSinceReferenceDate
+            var buffer = ""
             
+
             for await generation in try await mlxService.generate(
                 messages: messages, model: model!, parameters: generateParameters)
             {
@@ -123,20 +154,38 @@ class ChatModel: ObservableObject, Codable, Identifiable {
                 switch generation {
                 case .chunk(let chunk):
                     // Append new text to the current assistant message
-                    if let assistantMessage = messages.last {
-                        
-                        assistantMessage.content += chunk
+                    buffer += chunk
+                    let now = Date.timeIntervalSinceReferenceDate
+                    if now - lastFlush >= 0.033 { // ~30 fps
+                        let toApply = buffer
+                        buffer.removeAll()
+                        lastFlush = now
+                        await MainActor.run {
+                            messages.last?.content += toApply
+                        }
                     }
                 case .info(let info):
+                    if !buffer.isEmpty {
+                        let toApply = buffer
+                        buffer.removeAll()
+                        await MainActor.run {
+                            messages.last?.content += toApply
+                        }
+                    }
                     // Update performance metrics
-                    generateCompletionInfo = info
-                    messages.last?.generationInfo = info
-                    print(info)
+                    await MainActor.run {
+                            generateCompletionInfo = info
+                            messages.last?.generationInfo = info
+                        }
                 }
                 
+                
                 takeMemorySnapshot()
-                model!.finishedSize = model!.calculateSize
+//                model!.finishedSize = model!.calculateSize
             }
+#if os(macOS)
+            await NSApp.sendAction(#selector(NSDocument.save(_:)), to: nil, from: self)
+#endif
         }
         
         do {
@@ -144,42 +193,66 @@ class ChatModel: ObservableObject, Codable, Identifiable {
             try await withTaskCancellationHandler {
                 try await generateTask?.value
             } onCancel: {
-                Task { @MainActor in
-                    model?.state = .stopped
-
-                    generateTask?.cancel()
-                    
-                    // Mark message as cancelled
-                    if let assistantMessage = messages.last {
-                        assistantMessage.content += "\nThe generation was cancelled."
-                    }
+                Task {
+                    await self.handleCancellationCleanup()
                 }
             }
         } catch {
             errorMessage = error.localizedDescription
-            model?.state = .error
+            await MainActor.run {
+                model?.state = .error
+                messages.last?.modelState = .error
+            }
         }
         
-        model?.state = .idle
-        
-        isGenerating = false
-        generateTask = nil
-    }
-    
-    func cancelGeneration() {
-        generateTask?.cancel()
-        isGenerating = false
-        generateTask = nil
-        
-        Task { @MainActor in
-            // Mark message as cancelled
-            if let assistantMessage = messages.last {
-                if assistantMessage.role == .assistant {
-                    assistantMessage.content += "The generation was cancelled."
-                }
+        if model?.state == .generating {
+            await MainActor.run {
+                model?.state = .idle
+                messages.last?.modelState = .idle
+                isGenerating = false
+                generateTask = nil
             }
         }
     }
+    
+        func cancelGeneration() {
+            Task {
+                await self.handleCancellationCleanup()
+            }
+    }
+    
+    @MainActor
+    private func handleCancellationCleanup(appendNote: Bool = true) async {
+        // Capture and cancel any running generation task, then await its completion
+        let task = generateTask
+        task?.cancel()
+
+        // Await the task to ensure any underlying GPU work drains before teardown
+        _ = try? await task?.value
+
+        // Clear the stored reference after we've awaited it
+        generateTask = nil
+        isGenerating = false
+
+        // Update UI state
+        model?.state = .stopping
+        messages.last?.modelState = .stopping
+
+        // Optionally annotate the last assistant message
+        if appendNote, let last = messages.last, last.role == .assistant {
+            if !last.content.contains("The generation was cancelled.") {
+                last.content += (last.content.hasSuffix("\n") ? "" : "\n") + "The generation was cancelled."
+            }
+        }
+
+        model?.state = .idle
+        messages.last?.modelState = .idle
+
+        #if os(macOS)
+        NSApp.sendAction(#selector(NSDocument.save(_:)), to: nil, from: self)
+        #endif
+    }
+    
     
     /// Processes and adds media attachments to the current message
     func addMedia(_ result: Result<URL, any Error>) {
@@ -208,7 +281,9 @@ class ChatModel: ObservableObject, Codable, Identifiable {
         
         if options.contains(.chat) {
             if messages.count > 1 {messages = [messages[0]]}
-            generateTask?.cancel()
+            Task {
+                await self.handleCancellationCleanup(appendNote: false)
+            }
         }
         
         if options.contains(.meta) {
@@ -238,11 +313,11 @@ class ChatModel: ObservableObject, Codable, Identifiable {
         messages          = try c.decode([Message].self, forKey: .messages)
         finishedSize = try c.decode(Int64.self, forKey: .finishedSize)
         generateParameters = try c.decode(GenerateParameters.self, forKey: .generateParameters)
-        viewData = try c.decode(ChatViewModelData.self, forKey: .chatViewModelData)
+        style = try c.decode(StyleModel.self, forKey: .chatViewModelData)
         
         self.mlxService = MLXService()
         
-        let decodedModel = MLXService.availableModels.first { $0.configuration.name == modelID }
+        let decodedModel = MLXService.shared.allModels.first { $0.configuration.name == modelID }
         self.model = decodedModel
         
         model?.finishedSize = finishedSize
@@ -256,7 +331,7 @@ class ChatModel: ObservableObject, Codable, Identifiable {
         try c.encode(messages,           forKey: .messages)
         try c.encode(finishedSize, forKey: .finishedSize)
         try c.encode(generateParameters, forKey: .generateParameters)
-        try c.encode(viewData, forKey: .chatViewModelData)
+        try c.encode(style, forKey: .chatViewModelData)
         //    try c.encode(selectedModel.name, forKey: .selectedModel)
         
     }
@@ -308,7 +383,3 @@ struct ClearOption: RawRepresentable, OptionSet {
     static let gpuCache = ClearOption(rawValue: 1 << 3)
 }
 
-@Observable
-class ChatViewModelData: Codable {
-  var currentSelectedTab: Int = 0
-}

@@ -7,13 +7,7 @@
     "--" : {
 
     },
-    "%.2f%%" : {
-
-    },
     "%@" : {
-
-    },
-    "%@ tokens/s" : {
 
     },
     "%f" : {
@@ -34,6 +28,15 @@
     "Active:" : {
 
     },
+    "Add a model" : {
+
+    },
+    "Agent" : {
+
+    },
+    "Background" : {
+
+    },
     "Cache" : {
 
     },
@@ -43,7 +46,13 @@
     "Cancel" : {
 
     },
-    "Choose a new model..." : {
+    "Change Model" : {
+
+    },
+    "Change Temperature" : {
+
+    },
+    "Choose a model..." : {
 
     },
     "Clear Cache" : {
@@ -52,16 +61,46 @@
     "Clear Chat" : {
 
     },
+    "Clear Metadata" : {
+
+    },
+    "Color" : {
+
+    },
     "Controls creativity vs. determinism. Low Temperature (0.1-0.3) → For predictable, repetitive outputs. Low Temperature (0.1-0.3) → For predictable, repetitive outputs. High Temperature (1.2+) → For wild, unexpected responses:." : {
 
     },
     "Controls the randomness of the generated text." : {
 
     },
+    "Conversation" : {
+
+    },
+    "Current Model:" : {
+
+    },
     "Current:" : {
 
     },
+    "Custom Model" : {
+
+    },
+    "Delete Model Folder" : {
+
+    },
     "doChat" : {
+
+    },
+    "Done" : {
+
+    },
+    "Failed to load model details for:\n%@" : {
+
+    },
+    "Fetching model\nReadMe…" : {
+
+    },
+    "Foos" : {
 
     },
     "Generate an unlimited number of tokens." : {
@@ -76,19 +115,28 @@
     "Generation Time:" : {
 
     },
-    "Get Started" : {
-
-    },
     "GPU" : {
 
     },
     "GPU Memory" : {
 
     },
+    "Hide Delete Options" : {
+
+    },
+    "Interface" : {
+
+    },
     "Limit:" : {
 
     },
+    "LLM" : {
+
+    },
     "Memory Usage Chart" : {
+
+    },
+    "mlx-community/Foo-7B-4bit" : {
 
     },
     "Model Is Generating" : {
@@ -97,7 +145,22 @@
     "Models" : {
 
     },
+    "Models:" : {
+
+    },
+    "No model is Selected. Please select a model to see its ReadMe." : {
+
+    },
+    "No Model Selected" : {
+
+    },
+    "No revocation reason provided." : {
+
+    },
     "Number of previous tokens checked for penalizing repetition. Increase when generating longer text, to avoid repetition over a wider span." : {
+
+    },
+    "Options" : {
 
     },
     "Peak:" : {
@@ -109,22 +172,91 @@
     "Performance" : {
 
     },
+    "poos" : {
+
+    },
     "Prompt" : {
+
+    },
+    "Purchase %@" : {
+
+    },
+    "Purchase revoked: %@" : {
+
+    },
+    "ReadMe:" : {
+
+    },
+    "Remove Model From Model List" : {
 
     },
     "Repetition Context Size: %.0f" : {
 
     },
-    "Repetition Context Size: %.2f" : {
+    "Repetition Penalty: %.2f" : {
 
     },
-    "Repetition Penalty: %.2f" : {
+    "Response" : {
+
+    },
+    "Restore Purchase" : {
+
+    },
+    "Retry" : {
+
+    },
+    "Set document colors." : {
+
+    },
+    "Set options for the conversation." : {
+
+    },
+    "Sets the background color." : {
+
+    },
+    "Sets the color for the chat agent." : {
+
+    },
+    "Sets the main interface color." : {
+
+    },
+    "Sets the user chat bubble color." : {
 
     },
     "Settings" : {
 
     },
+    "Show Delete Options" : {
+
+    },
+    "Show Metadata" : {
+
+    },
+    "Show or hide the message metadata" : {
+
+    },
+    "Show or hide the message timestamps" : {
+
+    },
+    "Show or hide the prompt" : {
+
+    },
+    "Show Prompt" : {
+
+    },
+    "Show Studio Features" : {
+
+    },
+    "Show Timestamps" : {
+
+    },
+    "Stop Download" : {
+
+    },
     "Stop Generation" : {
+
+    },
+    "Style" : {
 
     },
     "Temperature: %.2f" : {
@@ -142,7 +274,16 @@
     "Time" : {
 
     },
+    "Toggle Sidebar" : {
+
+    },
+    "Token Usage" : {
+
+    },
     "Tokens" : {
+
+    },
+    "Tokens per Second" : {
 
     },
     "Tokens per second:" : {
@@ -157,7 +298,28 @@
     "TopP: %.2f" : {
 
     },
+    "Total Time" : {
+
+    },
+    "Total Tokens" : {
+
+    },
+    "Type" : {
+
+    },
+    "Upgrade to doChat Studio" : {
+
+    },
+    "Upgrade to doChat Studio to get these features" : {
+
+    },
     "Use Unlimited Token" : {
+
+    },
+    "User Chat Bubble" : {
+
+    },
+    "VLM" : {
 
     }
   },

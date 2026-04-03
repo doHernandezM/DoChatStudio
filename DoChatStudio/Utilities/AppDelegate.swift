@@ -37,8 +37,8 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     func saveUserData() {
         // Logic to save data before quitting
         _ = DoChatStudioApp.documents.map { document in
-            guard document.chat!.isGenerating == true else {
-                document.chat?.cancelGeneration()
+            guard document.chat.isGenerating == true else {
+                document.chat.cancelGeneration()
                 return true
             }
             return false

@@ -7,6 +7,10 @@
 
 import SwiftUI
 import Combine
+import UniformTypeIdentifiers
+#if canImport(UIKit)
+import UIKit
+#endif
 
 
 @main
@@ -14,75 +18,110 @@ struct DoChatStudioApp: App {
     
 #if os(macOS)
     @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
-    
 #endif
+    
+    @StateObject
+    private var entitlementManager: EntitlementManager
+    
+    @StateObject
+    private var purchaseManager: PurchaseManager
+
+
     static var documents: [DoChatStudioDocument] = []
     
     init() {
+        let entitlementManager = EntitlementManager()
+        let purchaseManager = PurchaseManager(entitlementManager: entitlementManager)
+        self._entitlementManager = StateObject(wrappedValue: entitlementManager)
+        self._purchaseManager = StateObject(wrappedValue: purchaseManager)
+        
     }
     
-    
-    
     var body: some Scene {
+        
 #if os(macOS)
         DocumentGroup(newDocument: DoChatStudioDocument(text: "")) { file in
             ContentView(document: file.document, url: file.fileURL)
+                .environmentObject(entitlementManager)
+                .environmentObject(purchaseManager)
+                .inspector(isPresented: Binding<Bool>(
+                    get:{file.document.chat.style.showInspector},
+                    set:{newValue in
+                        file.document.chat.style.showInspector = newValue}
+                ), content: {
+                    SidebarView(vm: Binding<ChatModel>(
+                        get:{file.document.chat},
+                        set:{newValue in
+                            file.document.chat = newValue}
+                    ))
+                    .environmentObject(entitlementManager)
+                    .environmentObject(purchaseManager)
+                    
+                })
         }
-//        .windowToolbarStyle(.unified)
+        .commands {
+            SidebarCommands()
+            InspectorCommands()
+            ToolbarCommands()
+        }
+
+        //        .windowToolbarStyle(.unified)
 #else
         DocumentGroup(newDocument: DoChatStudioDocument(text: "")) { file in
             ContentView(document: file.document, url: file.fileURL)
-
-//            if let model = file.document.chatModel {
-//                
-//                NavigationSplitView(sidebar: {
-//                    ExtractedView(currentTab: currentTab, vm: model)
-//                }, detail: {
-//                    ChatView(viewModel: model)
-//                        .toolbar(content: {
-//                            ToolbarItemGroup(content: {
-//                                ToolbarSelectedModelView(vm: file.document.chatModel!)
-//                            })
-//                            ToolbarItemGroup(content: {
-//                                ToolbarButtonsView(vm: file.document.chatModel!)
-//                            })
-//                            //
-//                            //                            Button(action: {
-//                            //                                file.document.chatModel?.clear([.chat, .meta])
-//                            //                            }, label: {
-//                            //                                ZStack(alignment: .center){
-//                            //                                    VStack{
-//                            //                                        Image(systemName: "text.badge.xmark")
-//                            //                                            .symbolRenderingMode(.palette)
-//                            //                                            .foregroundStyle(.red, Color.transparentAccent)
-//                            //                                            .font(.system(.title))
-//                            //                                        Text("Clear Chat")
-//                            //                                    }
-//                            //                                }
-//                            //                            })
-//                            //                            .buttonStyle(.plain)
-//                            
-//                        })
-//                    
-//                        .navigationSplitViewStyle(.prominentDetail)
-//                    //                        .toolbarVisibility(/*isMobile ? .hidden :*/ .visible, for: .automatic)
-//                        .padding()
-//                    
-//                    
-//                })
-//                .environmentObject(file.document)
-//            } else {
-//                EmptyView()
-//            }
-            
+                .environmentObject(entitlementManager)
+                .environmentObject(purchaseManager)
+                .inspector(isPresented: Binding<Bool>(
+                    get:{file.document.chat.style.showInspector},
+                    set:{newValue in
+                        file.document.chat.style.showInspector = newValue}
+                ), content: {
+                    SidebarView(vm: Binding<ChatModel>(
+                        get:{file.document.chat},
+                        set:{newValue in
+                            file.document.chat = newValue}
+                    ))
+                    .environmentObject(entitlementManager)
+                    .environmentObject(purchaseManager)
+                })
         }
-        DocumentGroupLaunchScene("doChat", {}, background:{
-            Color.accentColor
-            
+        .commands {
+            SidebarCommands()
+            InspectorCommands()
+            ToolbarCommands()
+        }
+        DocumentGroupLaunchScene("poos", {
+            NewDocumentButton("Foos", for: DoChatStudioDocument.self) {
+                try await withCheckedThrowingContinuation { continuation in
+                    continuation.resume(returning: DoChatStudioDocument(text: ""))
+                }
+            }
         })
+        
+//        DocumentLaunchView(for: [.doChat]){
+//            NewDocumentButton("Poo")
+//        } onDocumentOpen: { file in
+//            
+//        }
+
+        
+#endif
+        
+#if os(macOS)
+        Settings {
+            SettingsView()
+                .environmentObject(entitlementManager)
+                .environmentObject(purchaseManager)
+        }
 #endif
         
     }
     
     
 }
+//
+//func loadDoChatStudioModel(from url: URL) throws -> DoChatStudioDocument {
+//    let data = try Data(contentsOf: url)
+//    let decoded = try JSONDecoder().decode(DoChatStudioDocument.self, from: data)
+//    return decoded.chatModel
+//}
