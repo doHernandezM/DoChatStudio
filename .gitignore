@@ -1,0 +1,35 @@
+# Xcode per-user state
+**/xcuserdata/
+*.xcuserstate
+
+# Apple signing, provisioning, entitlements, and StoreKit test data
+*.entitlements
+*.cer
+*.p12
+*.p8
+*.pem
+*.key
+*.mobileprovision
+*.provisionprofile
+*.storekit
+
+# Local project identity and signing configuration
+*.xcodeproj/project.pbxproj
+DoChatStudio/Info.plist
+DoChatStudio/Models/FileController.swift
+
+# Personal source photos and embedded metadata
+DoChatStudio/Assets.xcassets/DSCN*.imageset/*.JPG
+DoChatStudio/Assets.xcassets/DSCN*.imageset/*.jpg
+DoChatStudio/Assets.xcassets/DSCN*.imageset/*.jpeg
+
+# Environment and credential files
+.env
+.env.*
+*.secret
+*.secrets
+*credentials*
+*password*
+
+# Common local metadata
+.DS_Store
