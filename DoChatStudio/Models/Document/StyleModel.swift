@@ -5,6 +5,8 @@
 //  Created by Cosas on 7/14/25.
 //
 
+// Stores the per-document appearance and inspector presentation preferences.
+
 import Foundation
 import SwiftUI
 

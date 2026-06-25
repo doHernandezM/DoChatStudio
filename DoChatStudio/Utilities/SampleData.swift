@@ -5,6 +5,8 @@
 //  Created by İbrahim Çetin on 20.04.2025.
 //
 
+// Supplies representative conversation data for SwiftUI previews and development.
+
 @MainActor
 struct SampleData {
     static let conversation: [Message] = [

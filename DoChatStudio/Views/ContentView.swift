@@ -4,6 +4,8 @@
 //  Created by Cosas on 1/28/25.
 //
 
+// Hosts a document's primary chat workspace and coordinates save, close, purchase, and error UI.
+
 import SwiftUI
 import FlexView
 import StoreKit
@@ -11,6 +13,7 @@ import StoreKit
 struct ContentView: View {
     @EnvironmentObject private var purchaseManager: PurchaseManager
     
+    /// Supplies the persistent ChatModel consumed by the chat and inspector UI.
     @ObservedObject var document: DoChatStudioDocument
     
     @State private var currentTab: Int = 0
@@ -46,6 +49,11 @@ struct ContentView: View {
         }
     }
     
+    /// Attaches the document model to the interactive chat hierarchy.
+    ///
+    /// `ChatView` receives the same `ChatModel` that is edited by the scene's
+    /// inspector, while the environment object lets `PromptField` coordinate
+    /// generation and document-level state.
     var body: some View {
         
         //        if let model = document.chat {

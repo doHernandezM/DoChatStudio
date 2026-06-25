@@ -5,6 +5,8 @@
 //  Created by Cosas on 9/28/25.
 //
 
+// Adds persistence and hashing support to MLX model configuration identifiers.
+
 import Foundation
 import MLX
 import MLXLLM

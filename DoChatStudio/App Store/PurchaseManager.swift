@@ -5,6 +5,8 @@
 //  Created by Josh Holtz on 9/19/22.
 //
 
+// Manages StoreKit products, purchases, restores, transaction updates, and Studio entitlements.
+
 import Foundation
 import StoreKit
 import SwiftUI

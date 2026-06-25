@@ -5,6 +5,8 @@
 //  Created by Cosas on 9/21/25.
 //
 
+// Displays transaction problems and lets the user dismiss or resolve them.
+
 import SwiftUI
 import StoreKit
 

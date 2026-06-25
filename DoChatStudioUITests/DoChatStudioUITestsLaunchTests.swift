@@ -5,6 +5,8 @@
 //  Created by Cosas on 1/30/25.
 //
 
+// Verifies application launch across UI configurations and captures launch screenshots.
+
 import XCTest
 
 final class DoChatStudioUITestsLaunchTests: XCTestCase {

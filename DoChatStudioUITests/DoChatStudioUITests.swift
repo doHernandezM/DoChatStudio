@@ -5,6 +5,8 @@
 //  Created by Cosas on 1/30/25.
 //
 
+// Contains end-to-end UI tests that launch and exercise the DoChatStudio application.
+
 import XCTest
 
 final class DoChatStudioUITests: XCTestCase {

@@ -5,6 +5,8 @@
 //  Created by Cosas on 2/7/25.
 //
 
+// Stores shared application configuration, debug settings, and transient banner state.
+
 import Foundation
 import SwiftUI
 

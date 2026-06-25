@@ -5,6 +5,8 @@
 //  Created by Cosas on 10/1/25.
 //
 
+// Displays generation state, timing, token counts, and throughput for a message.
+
 import SwiftUI
 
 struct GenerationInfoView: View {
@@ -121,4 +123,3 @@ struct GenerationInfoView: View {
 #Preview {
     GenerationInfoView(style: .constant(StyleModel()), message: Message(role: .user, content: ""))
 }
-

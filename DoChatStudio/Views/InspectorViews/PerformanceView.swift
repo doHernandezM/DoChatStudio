@@ -5,6 +5,8 @@
 //  Created by Cosas on 6/19/25.
 //
 
+// Visualizes generation throughput and sampled MLX GPU memory consumption.
+
 import SwiftUI
 import Charts
 

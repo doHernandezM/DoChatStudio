@@ -5,9 +5,13 @@
 //  Created by Cosas on 9/30/25.
 //
 
+// Summarizes the active model and opens the full model selection interface.
+
 import SwiftUI
 
 struct SelectedModelView: View {
+    /// Binding to the same ChatModel used by ChatView; changing `vm.model`
+    /// changes which MLX container is loaded for the next prompt.
     @Binding var vm: ChatModel
     @State private var showingModelsSheet: Bool = false
     

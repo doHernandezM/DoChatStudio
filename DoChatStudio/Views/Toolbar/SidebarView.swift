@@ -5,6 +5,8 @@
 //  Created by Cosas on 9/30/25.
 //
 
+// Defines the inspector sidebar, section picker, and model, configuration, and performance panels.
+
 import SwiftUI
 
 struct SidebarView: View {

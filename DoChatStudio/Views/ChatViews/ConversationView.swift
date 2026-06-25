@@ -5,6 +5,8 @@
 //  Created by İbrahim Çetin on 20.04.2025.
 //
 
+// Renders the scrollable message history and editable system prompt for a chat document.
+
 import SwiftUI
 
 /// Displays the chat conversation as a scrollable list of messages.

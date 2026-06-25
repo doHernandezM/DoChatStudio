@@ -1,16 +1,11 @@
 //
-// AppUtilities.swift
-// DoChatStudio
-//
-// Created by Cosas on 6/1/25.
-//
-
-//
 //  AppUtilities.swift
 //  DoChatStudio
 //
 //  Created by Cosas on 6/1/25.
 //
+
+// Provides cross-platform memory, color, string, URL, and codable color utilities.
 
 import Foundation
 import Darwin          // for sysctl

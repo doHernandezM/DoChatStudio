@@ -5,6 +5,8 @@
 //  Created by Cosas on 6/19/25.
 //
 
+// Presents generation parameters and style controls, including undoable sampling adjustments.
+
 import SwiftUI
 import Charts
 
@@ -96,6 +98,7 @@ struct ConfigurationView: View {
 
 struct ModelConfigurationView: View {
     @Environment(\.undoManager) var undoManager
+    /// Edits `GenerateParameters` that ChatModel forwards directly to MLX.
     @Bindable var vm: ChatModel
     
     var body: some View {

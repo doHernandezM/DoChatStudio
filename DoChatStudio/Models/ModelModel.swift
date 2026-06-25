@@ -5,6 +5,8 @@
 //  Created by İbrahim Çetin on 21.04.2025.
 //
 
+// Represents a local or remote MLX model and manages loading, downloading, caching, and deletion.
+
 import Foundation
 import Hub
 import MLX
@@ -37,7 +39,7 @@ class ModelModel {
     
     var name: String
     
-    ///Current model of the state
+    /// Observable lifecycle state rendered by prompt, toolbar, and model-list UI.
     var state: ModelState? = nil
     
     var size: Int64 = 0
@@ -174,7 +176,11 @@ class ModelModel {
     //    @MainActor
     //    private(set) var modelFraction: Double?
     
-    /// Loads a model from the hub or retrieves it from cache.
+    /// Resolves the selected UI model into an executable MLX container.
+    ///
+    /// The model type chooses the appropriate factory: `LLMModelFactory` for
+    /// text models and `VLMModelFactory` for multimodal models. If the factory
+    /// cannot load local files, the method falls back to a Hub download.
     /// - Parameter model: The model configuration to load
     /// - Returns: A ModelContainer instance containing the loaded model
     /// - Throws: Errors that might occur during model loading
@@ -193,6 +199,8 @@ class ModelModel {
             return container
         }
         
+        // Both factories expose ModelFactory, allowing MLXService to treat LLM
+        // and VLM generation uniformly after the container has loaded.
         let factory: ModelFactory =
         switch model.type {
         case .llm:
@@ -212,6 +220,8 @@ class ModelModel {
     
     var downloadTask: Task<ModelContainer, Error>? = nil
     
+    /// Downloads model files while publishing progress for `ModelCellView` and
+    /// caches the resulting container for subsequent generations.
     @discardableResult
     func downloadModel(model: ModelModel) async throws -> ModelContainer {
         // Select appropriate factory based on model type
@@ -448,4 +458,3 @@ enum ModelLoadError:Error {
     case modelLoad(message: String)
     
 }
-

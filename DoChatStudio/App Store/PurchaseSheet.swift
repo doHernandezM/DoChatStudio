@@ -5,6 +5,8 @@
 //  Created by Cosas on 9/21/25.
 //
 
+// Presents the Studio upgrade interface and initiates or restores purchases.
+
 import SwiftUI
 import StoreKit
 

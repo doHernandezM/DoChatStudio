@@ -4,6 +4,9 @@
 //
 //  Created by Cosas on 6/24/25.
 //
+
+// Defines codable GPU memory metrics and timestamped samples collected during generation.
+
 import Foundation
 import MLX
 import MLXLMCommon

@@ -5,6 +5,8 @@
 //  Created by İbrahim Çetin on 20.04.2025.
 //
 
+// Owns persistent chat state and coordinates prompts, attachments, streaming generation, and cancellation.
+
 import Foundation
 import MLX
 import MLXLMCommon
@@ -18,7 +20,7 @@ import AppKit
 @Observable
 
 class ChatModel: ObservableObject, Codable, Identifiable {
-    /// Service responsible for ML model operations
+    /// Converts document-level chat state into MLX generation work.
     private let mlxService: MLXService
     var finishedSize: Int64 = 0
 
@@ -30,7 +32,7 @@ class ChatModel: ObservableObject, Codable, Identifiable {
     
     var modelID:String?
     
-    /// Current user input text
+    /// Two-way bound to `PromptField`; cleared after the user message is queued.
     var prompt: String = ""
     
     /// Chat history containing system, user, and assistant messages
@@ -38,7 +40,7 @@ class ChatModel: ObservableObject, Codable, Identifiable {
         .prompt("You are a helpful assistant! Your name is Nichelle and are located in Toledo, Ohio")
     ]
     
-    /// Currently selected language model for generation
+    /// Selected by the inspector and passed to `MLXService` for the next request.
     var model: ModelModel?// = MLXService.defaultModel
     
     /// Manages image and video attachments for the current message
@@ -47,7 +49,8 @@ class ChatModel: ObservableObject, Codable, Identifiable {
     /// Indicates if text generation is in progress
     var isGenerating = false
     
-    ///
+    /// Sampling and token controls edited by `ConfigurationView` and forwarded
+    /// unchanged to `MLXLMCommon.generate`.
     var generateParameters: GenerateParameters = GenerateParameters()
     
     /// Current generation task, used for cancellation
@@ -104,7 +107,12 @@ class ChatModel: ObservableObject, Codable, Identifiable {
     #endif
     }
     
-    /// Generates response for the current prompt and media attachments
+    /// Runs the complete UI-to-MLX generation transaction.
+    ///
+    /// The method snapshots the current prompt and attachments into a user
+    /// message, creates an empty assistant message for streamed output, asks
+    /// `MLXService` for an asynchronous generation stream, and publishes chunks
+    /// back to SwiftUI by mutating the final message on the main actor.
     func generate() async {
         
 #if targetEnvironment(simulator)
@@ -143,6 +151,8 @@ class ChatModel: ObservableObject, Codable, Identifiable {
             var buffer = ""
             
 
+            // MLXService owns input preparation and model execution. This layer
+            // owns presentation-friendly buffering and document state updates.
             for await generation in try await mlxService.generate(
                 messages: messages, model: model!, parameters: generateParameters)
             {
@@ -161,6 +171,8 @@ class ChatModel: ObservableObject, Codable, Identifiable {
                         buffer.removeAll()
                         lastFlush = now
                         await MainActor.run {
+                            // Message is observable, so this mutation incrementally
+                            // redraws the assistant response in ConversationView.
                             messages.last?.content += toApply
                         }
                     }
@@ -172,7 +184,7 @@ class ChatModel: ObservableObject, Codable, Identifiable {
                             messages.last?.content += toApply
                         }
                     }
-                    // Update performance metrics
+                    // Persist MLX completion metadata for the message and inspector.
                     await MainActor.run {
                             generateCompletionInfo = info
                             messages.last?.generationInfo = info
@@ -215,6 +227,7 @@ class ChatModel: ObservableObject, Codable, Identifiable {
         }
     }
     
+    /// Entry point used by the UI and document-close flow to stop inference.
         func cancelGeneration() {
             Task {
                 await self.handleCancellationCleanup()
@@ -222,6 +235,8 @@ class ChatModel: ObservableObject, Codable, Identifiable {
     }
     
     @MainActor
+    /// Cancels the Swift task, waits for MLX work to drain, and returns all
+    /// observable UI state to a consistent idle state.
     private func handleCancellationCleanup(appendNote: Bool = true) async {
         // Capture and cancel any running generation task, then await its completion
         let task = generateTask
@@ -254,7 +269,8 @@ class ChatModel: ObservableObject, Codable, Identifiable {
     }
     
     
-    /// Processes and adds media attachments to the current message
+    /// Converts file-importer results into attachments that `MLXService` later
+    /// maps to MLX `UserInput.Image` and `UserInput.Video` values.
     func addMedia(_ result: Result<URL, any Error>) {
         do {
             let url = try result.get()
@@ -305,6 +321,8 @@ class ChatModel: ObservableObject, Codable, Identifiable {
         case chatViewModelData, id, modelID, prompt, messages, generateParameters, selectedModel, finishedSize
     }
     
+    /// Restores persisted UI state and resolves the saved model identifier
+    /// against the live model catalog used by MLX.
     required init(from decoder: Decoder) throws {
         let c = try decoder.container(keyedBy: CodingKeys.self)
         id                = try c.decode(UUID.self, forKey: .id)
@@ -382,4 +400,3 @@ struct ClearOption: RawRepresentable, OptionSet {
     /// Clears generation metadata
     static let gpuCache = ClearOption(rawValue: 1 << 3)
 }
-

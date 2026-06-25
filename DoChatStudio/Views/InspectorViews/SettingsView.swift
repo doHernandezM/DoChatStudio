@@ -5,6 +5,8 @@
 //  Created by Cosas on 9/22/25.
 //
 
+// Provides application-level preferences for displaying Studio-gated features.
+
 import SwiftUI
 
 struct SettingsView: View {

@@ -5,6 +5,8 @@
 //  Created by Cosas on 6/28/25.
 //
 
+// Combines model discovery, model-card details, and selection into the model browser.
+
 import MLX
 import MLXLMCommon
 import MLXLLM
@@ -12,6 +14,7 @@ import MLXLLM
 import SwiftUI
 
 struct ModelsListView: View {
+    /// Shared chat model whose selection is consumed by the generation pipeline.
 //    @Environment(\.dismiss) private var dismiss
 //    
     @Bindable var vm: ChatModel
@@ -135,6 +138,8 @@ struct ModelList: View {
                     if vm.model != nil && optionKeyPressed {
                         vm.model = nil
                     } else {
+                        // MLXService observes this choice on the next generation
+                        // and replaces its loaded container when necessary.
                         vm.model = model
                         vm.style.currentSelectedTab = 1
                     }

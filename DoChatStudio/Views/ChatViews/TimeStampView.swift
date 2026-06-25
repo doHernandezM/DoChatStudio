@@ -5,6 +5,8 @@
 //  Created by Cosas on 9/19/25.
 //
 
+// Presents a compact timestamp for an individual conversation message.
+
 import SwiftUI
 
 struct TimeStampView: View {

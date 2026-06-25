@@ -5,6 +5,8 @@
 //  Created by İbrahim Çetin on 20.04.2025.
 //
 
+// Composes the conversation, attachment previews, prompt controls, importer, and chat toolbar.
+
 import AVFoundation
 import AVKit
 import SwiftUI
@@ -12,7 +14,8 @@ import SwiftUI
 /// Main chat interface view that manages the conversation UI and user interactions.
 /// Displays messages, handles media attachments, and provides input controls.
 struct ChatView: View {
-    /// View model that manages the chat state and business logic
+    /// The shared document model observed by the conversation, prompt, toolbar,
+    /// model picker, and generation status UI.
     @Bindable private var vm: ChatModel
     @EnvironmentObject private var purchaseManager: PurchaseManager
     
@@ -22,6 +25,7 @@ struct ChatView: View {
         self.vm = viewModel
     }
     
+    /// Binds visible controls to the state that `ChatModel` sends to MLX.
     var body: some View {
         VStack(spacing: 0) {
             // Display conversation history
@@ -39,6 +43,7 @@ struct ChatView: View {
                 PromptField(
                     style: $vm.style, prompt: $vm.prompt,
                     sendButtonAction: {
+                        // This closure is the UI boundary into the inference pipeline.
                         await vm.generate()
                     },
                     // Only show media button for vision-capable models
@@ -63,6 +68,7 @@ struct ChatView: View {
         .fileImporter(
             isPresented: $vm.mediaSelection.isShowing,
             allowedContentTypes: [.image, .movie],
+            // Imported URLs become UserInput image/video values in MLXService.
             onCompletion: vm.addMedia
         )
         .toolbar {

@@ -5,6 +5,8 @@
 //  Created by İbrahim Çetin on 21.04.2025.
 //
 
+// Extends the Hugging Face Hub client with model metadata, README, and configuration requests.
+
 import CryptoKit
 import Foundation
 import Network

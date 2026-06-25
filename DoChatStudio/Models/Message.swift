@@ -5,6 +5,8 @@
 //  Created by İbrahim Çetin on 20.04.2025.
 //
 
+// Defines codable chat messages, role-specific constructors, media references, and generation metadata.
+
 import Foundation
 import MLX
 import MLXLMCommon
@@ -16,7 +18,7 @@ class Message: Identifiable, Codable {
     /// Unique identifier for the message
     let id: UUID
 
-    /// The role of the message sender (user, assistant, or system)
+    /// The app role that `MLXService` maps to an MLX chat role.
     let role: Role
 
     /// The text content of the message
@@ -33,6 +35,7 @@ class Message: Identifiable, Codable {
     
     var timeStampString: String
     
+    /// Completion metadata returned by MLX and displayed by generation UI.
     var generationInfo: GenerateCompletionInfo? = nil {
         didSet {
             self.timeStampString = {
@@ -53,6 +56,7 @@ class Message: Identifiable, Codable {
         }
     }
 
+    /// Snapshot of model lifecycle state displayed alongside this message.
     var modelState: ModelState? = nil
     
     /// Creates a new message with the specified role, content, and optional media attachments
@@ -79,13 +83,14 @@ class Message: Identifiable, Codable {
 
     /// Defines the role of the message sender in the conversation
     enum Role: Codable {
-        /// Message from the user
+        /// Editable document prompt mapped to MLX's system role.
         case prompt
         
+        /// User input mapped directly to MLX's user role.
         case user
-        /// Message from the AI assistant
+        /// Generated output mapped directly to MLX's assistant role.
         case assistant
-        /// System message providing context or instructions
+        /// Additional system context mapped directly to MLX's system role.
         case system
     }
 }
@@ -186,4 +191,3 @@ extension GenerateCompletionInfo: Codable {
 //    public let generateTime: TimeInterval
 //        
 }
-

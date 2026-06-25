@@ -5,6 +5,8 @@
 //  Created by İbrahim Çetin on 21.04.2025.
 //
 
+// Defines image and video attachment previews with controls for removing selected media.
+
 import AVFoundation
 import AVKit
 import SwiftUI

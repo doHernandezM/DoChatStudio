@@ -5,6 +5,8 @@
 //  Created by İbrahim Çetin on 20.04.2025.
 //
 
+// Bridges app chat data to MLX inference and persists the catalog of custom models.
+
 import Foundation
 import Hub
 import MLX
@@ -87,13 +89,19 @@ class MLXService {
     }
     
 
-    /// Generates text based on the provided messages using the specified model.
-    /// - Parameters:
-    ///   - messages: Array of chat messages including user, assistant, and system messages
-    ///   - model: The language model to use for generation
-    /// - Returns: An AsyncStream of generated text tokens
-    /// - Throws: Errors that might occur during generation
+    /// The currently loaded MLX runtime container.
+    ///
+    /// It is discarded when the selected model changes so the next request is
+    /// prepared with the correct tokenizer, processor, and weights.
     var modelContainer: ModelContainer?
+
+    /// Translates application chat state into an MLX generation stream.
+    /// - Parameters:
+    ///   - messages: Document messages in conversation order.
+    ///   - model: Selected LLM or VLM configuration.
+    ///   - parameters: Sampling and token limits edited by the UI.
+    /// - Returns: MLX text chunks followed by completion information.
+    /// - Throws: Model loading, input preparation, or generation errors.
     
     func generate(messages: [Message], model: ModelModel, parameters: GenerateParameters = GenerateParameters(temperature: 0.7)) async throws -> AsyncStream<Generation> {
         
@@ -101,15 +109,16 @@ class MLXService {
             modelContainer = nil
         }
         
+        // ModelModel selects an LLM/VLM factory and loads local weights, or
+        // downloads them from Hugging Face when they are not available.
         modelContainer = try await model.load(model: model)
-        // Load or retrieve model from cache
         if modelContainer == nil {throw ModelLoadError.modelLoad(message: "Model Container not Loaded")}
         await MainActor.run {
             model.state = .generating
             messages.last?.modelState = .generating
         }
         
-        // Map app-specific Message type to Chat.Message for model input
+        // Translate the persistent app schema into MLXLMCommon's chat schema.
         let chat = messages.map { message in
             let role: Chat.Message.Role =
             switch message.role {
@@ -131,11 +140,13 @@ class MLXService {
                 role: role, content: message.content, images: images, videos: videos)
         }
         
-        // Prepare input for model processing
+        // VLM processors resize attached media while text-only processors use
+        // the same UserInput chat without media payloads.
         let userInput = UserInput(
             chat: chat, processing: .init(resize: .init(width: 1024, height: 1024)))
         
-        // Generate response using the model
+        // ModelContainer.perform serializes access to the loaded model context.
+        // The returned AsyncStream is consumed by ChatModel and reflected in UI.
         return try await modelContainer!.perform { (context: ModelContext) in
             let lmInput = try await context.processor.prepare(input: userInput)
             
@@ -329,4 +340,3 @@ extension GenerateParameters: Codable {
         try container.encode(repetitionContextSize,  forKey: .repetitionContextSize)
     }
 }
-

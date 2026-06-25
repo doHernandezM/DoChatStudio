@@ -5,6 +5,8 @@
 //  Created by İbrahim Çetin on 21.04.2025.
 //
 
+// Builds chat toolbar items for errors, model state, generation metrics, and document actions.
+
 import SwiftUI
 import StoreKit
 

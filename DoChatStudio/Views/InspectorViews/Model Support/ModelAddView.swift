@@ -5,6 +5,8 @@
 //  Created by Cosas on 9/22/25.
 //
 
+// Validates and adds custom MLX Community LLM or VLM repositories to the model catalog.
+
 import SwiftUI
 
 struct ModelAddView: View {

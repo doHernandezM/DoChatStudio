@@ -5,6 +5,8 @@
 //  Created by İbrahim Çetin on 20.04.2025.
 //
 
+// Provides the prompt editor and animated send, stop, and media attachment controls.
+
 import SwiftUI
 
 struct PromptField: View {
@@ -16,9 +18,15 @@ struct PromptField: View {
     @EnvironmentObject var document: DoChatStudioDocument
 //    @Environment(\.saveAction) private var saveAction
 
+    /// Async callback supplied by `ChatView`; in production this invokes
+    /// `ChatModel.generate()` and remains active for the streamed response.
     let sendButtonAction: () async -> Void
     let mediaButtonAction: (() -> Void)?
 
+    /// Starts the UI task that owns one generation request.
+    ///
+    /// Cancelling this task propagates cancellation to `ChatModel.generate()`,
+    /// while the model's observable state drives the animated control styling.
     fileprivate func startGeneration() {
         withAnimation(.linear(duration: 1/5)) {
             document.chat.style.currentSelectedTab = 2
@@ -64,6 +72,7 @@ struct PromptField: View {
         : StrokeStyle(lineWidth: 4)
     }
 
+    /// Reflects the lifetime of the UI task, not the lower-level MLX model state.
     var isRunning: Bool {
         task != nil && !(task!.isCancelled)
     }
@@ -179,4 +188,3 @@ extension View {
     }
 }
 #endif
-

@@ -1,3 +1,5 @@
+// Retains an experimental custom inspector toggle implementation for future reactivation.
+
 ////
 ////  InspectorToggleView.swift
 ////  DoChatStudio

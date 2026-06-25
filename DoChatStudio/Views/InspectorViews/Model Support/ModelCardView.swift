@@ -5,6 +5,8 @@
 //  Created by Cosas on 9/28/25.
 //
 
+// Loads and presents a selected model's Hugging Face README with loading and error states.
+
 import SwiftUI
 
 enum ModelCardState: Equatable {
@@ -134,4 +136,3 @@ struct ModelCardView: View {
 #Preview {
     ModelCardView(modelName: .constant(""), modelCardState: .constant(.hidden), fetchTask: .constant(nil), style: StyleModel())
 }
-

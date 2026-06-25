@@ -5,6 +5,8 @@
 //  Created by Cosas on 6/29/25.
 //
 
+// Displays model status, size, download progress, cancellation, and deletion actions.
+
 import MLX
 import MLXLMCommon
 import MLXLLM

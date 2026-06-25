@@ -5,6 +5,8 @@
 //  Created by Cosas on 2/1/25.
 //
 
+// Defines shared visual modifiers and gradient helpers used throughout the app.
+
 import SwiftUI
 
 struct DoStyle: ViewModifier {

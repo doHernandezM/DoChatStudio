@@ -5,6 +5,8 @@
 //  Created by Cosas on 9/21/25.
 //
 
+// Wraps Studio-only controls with entitlement-aware visibility and upgrade behavior.
+
 import SwiftUI
 
 struct EntitledControl<Content: View>: View {

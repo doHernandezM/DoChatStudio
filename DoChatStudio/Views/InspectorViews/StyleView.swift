@@ -1,4 +1,6 @@
 
+// Provides undoable controls for message metadata visibility and document colors.
+
 import SwiftUI
 
 struct StyleView: View {

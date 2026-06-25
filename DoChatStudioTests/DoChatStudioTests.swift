@@ -5,6 +5,8 @@
 //  Created by Cosas on 1/30/25.
 //
 
+// Contains unit tests for DoChatStudio models and application behavior.
+
 import Testing
 
 struct DoChatStudioTests {

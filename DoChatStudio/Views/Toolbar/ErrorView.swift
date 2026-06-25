@@ -5,6 +5,8 @@
 //  Created by İbrahim Çetin on 21.04.2025.
 //
 
+// Presents a toolbar error indicator that reveals the current generation error.
+
 import SwiftUI
 
 struct ErrorView: View {

@@ -5,6 +5,8 @@
 //  Created by Cosas on 1/30/25.
 //
 
+// Defines the app entry point, document scenes, inspectors, commands, and shared purchase state.
+
 import SwiftUI
 import Combine
 import UniformTypeIdentifiers
@@ -15,6 +17,14 @@ import UIKit
 
 @main
 struct DoChatStudioApp: App {
+    /*
+     UI-to-MLX interaction path:
+     1. DocumentGroup opens or creates a DoChatStudioDocument.
+     2. ContentView renders the document's ChatModel.
+     3. ChatView binds prompt, model, and generation controls to that ChatModel.
+     4. ChatModel calls MLXService, which prepares input and starts MLX generation.
+     5. Streamed MLX output mutates the document's messages and refreshes SwiftUI.
+     */
     
 #if os(macOS)
     @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
@@ -37,10 +47,15 @@ struct DoChatStudioApp: App {
         
     }
     
+    /// Creates the document UI and gives every view access to shared purchase state.
+    ///
+    /// The LLM state itself is not global: each `DoChatStudioDocument` owns its
+    /// own `ChatModel`, selected model, conversation, and generation settings.
     var body: some Scene {
         
 #if os(macOS)
         DocumentGroup(newDocument: DoChatStudioDocument(text: "")) { file in
+            // Passing the document into ContentView begins the UI-to-inference chain.
             ContentView(document: file.document, url: file.fileURL)
                 .environmentObject(entitlementManager)
                 .environmentObject(purchaseManager)
@@ -49,6 +64,8 @@ struct DoChatStudioApp: App {
                     set:{newValue in
                         file.document.chat.style.showInspector = newValue}
                 ), content: {
+                    // The inspector edits the same ChatModel used by ChatView, so model
+                    // selection and sampling changes apply to the next generation.
                     SidebarView(vm: Binding<ChatModel>(
                         get:{file.document.chat},
                         set:{newValue in

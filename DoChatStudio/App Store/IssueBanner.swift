@@ -5,6 +5,8 @@
 //  Created by Cosas on 9/21/25.
 //
 
+// Presents a dismissible in-app banner for purchase and configuration issues.
+
 import SwiftUI
 import StoreKit
 

@@ -4,6 +4,8 @@
 //  Created by Oscar de la Hera Gomez on 10/18/24.
 //
 
+// Implements macOS termination handling so active model generations can be cancelled or preserved safely.
+
 #if os(macOS)
 import AppKit
 

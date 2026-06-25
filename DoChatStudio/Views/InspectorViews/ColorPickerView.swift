@@ -5,6 +5,8 @@
 //  Created by Cosas on 7/15/25.
 //
 
+// Provides entitlement-aware controls for the document's interface and message colors.
+
 import SwiftUI
 
 struct ColorPickerView: View {

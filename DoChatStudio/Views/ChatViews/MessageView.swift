@@ -5,6 +5,8 @@
 //  Created by İbrahim Çetin on 20.04.2025.
 //
 
+// Renders a role-aware chat message, its media, timestamp, and generation details.
+
 import AVKit
 import SwiftUI
 

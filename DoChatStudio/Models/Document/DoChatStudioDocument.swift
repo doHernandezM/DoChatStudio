@@ -1,4 +1,5 @@
-// DoChatStudioDocument.swift (Updated for SwiftLLM B)
+// DoChatStudioDocument.swift
+// Defines the document format and persistence lifecycle for a complete DoChatStudio workspace.
 
 import SwiftUI
 import UniformTypeIdentifiers
@@ -26,6 +27,10 @@ class DoChatStudioDocument: FileDocument, ObservableObject {
         }
     }
     
+    /// The document-owned bridge between the SwiftUI hierarchy and MLX.
+    ///
+    /// Keeping this model on the document makes conversation history, model
+    /// selection, generation parameters, and style independent per open file.
     @Published var chat: ChatModel = ChatModel(mlxService: MLXService())
     
     @Published var locked: Bool = false
@@ -44,6 +49,8 @@ class DoChatStudioDocument: FileDocument, ObservableObject {
     }
     
     
+    /// Reconstructs the chat state used by the UI and reconnects it to a live
+    /// `MLXService` through `ChatModel` decoding.
     required init(configuration: ReadConfiguration) throws {
         guard let data = configuration.file.regularFileContents else {
             throw CocoaError(.fileReadCorruptFile)
@@ -84,6 +91,8 @@ class DoChatStudioDocument: FileDocument, ObservableObject {
         }
     }
     
+    /// Serializes the UI-visible chat state, including the selected MLX model
+    /// identifier and generation parameters, into the document.
     @MainActor
     func fileWrapper(configuration: WriteConfiguration) throws -> FileWrapper {
         var data:Data
