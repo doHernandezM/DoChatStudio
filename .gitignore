@@ -13,11 +13,6 @@
 *.provisionprofile
 *.storekit
 
-# Local project identity and signing configuration
-*.xcodeproj/project.pbxproj
-DoChatStudio/Info.plist
-DoChatStudio/Models/FileController.swift
-
 # Personal source photos and embedded metadata
 DoChatStudio/Assets.xcassets/DSCN*.imageset/*.JPG
 DoChatStudio/Assets.xcassets/DSCN*.imageset/*.jpg

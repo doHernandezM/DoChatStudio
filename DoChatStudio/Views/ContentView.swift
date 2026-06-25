@@ -7,7 +7,6 @@
 // Hosts a document's primary chat workspace and coordinates save, close, purchase, and error UI.
 
 import SwiftUI
-import FlexView
 import StoreKit
 
 struct ContentView: View {

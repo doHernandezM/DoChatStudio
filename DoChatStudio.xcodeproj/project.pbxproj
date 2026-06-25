@@ -1,0 +1,765 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		AA1BD6A42E108CF8007283CC /* hub-cli in Frameworks */ = {isa = PBXBuildFile; productRef = AA1BD6A32E108CF8007283CC /* hub-cli */; };
+		AA88B5112E04BC1900DDC8EF /* MLX in Frameworks */ = {isa = PBXBuildFile; productRef = AA88B5102E04BC1900DDC8EF /* MLX */; };
+		AA88B5132E04BC1900DDC8EF /* MLXFFT in Frameworks */ = {isa = PBXBuildFile; productRef = AA88B5122E04BC1900DDC8EF /* MLXFFT */; };
+		AA88B5152E04BC1900DDC8EF /* MLXFast in Frameworks */ = {isa = PBXBuildFile; productRef = AA88B5142E04BC1900DDC8EF /* MLXFast */; };
+		AA88B5172E04BC1900DDC8EF /* MLXLinalg in Frameworks */ = {isa = PBXBuildFile; productRef = AA88B5162E04BC1900DDC8EF /* MLXLinalg */; };
+		AA88B5192E04BC1900DDC8EF /* MLXNN in Frameworks */ = {isa = PBXBuildFile; productRef = AA88B5182E04BC1900DDC8EF /* MLXNN */; };
+		AA88B51C2E04BC3300DDC8EF /* MLXEmbedders in Frameworks */ = {isa = PBXBuildFile; productRef = AA88B51B2E04BC3300DDC8EF /* MLXEmbedders */; };
+		AA88B51E2E04BC3300DDC8EF /* MLXLLM in Frameworks */ = {isa = PBXBuildFile; productRef = AA88B51D2E04BC3300DDC8EF /* MLXLLM */; };
+		AA88B5202E04BC3300DDC8EF /* MLXLMCommon in Frameworks */ = {isa = PBXBuildFile; productRef = AA88B51F2E04BC3300DDC8EF /* MLXLMCommon */; };
+		AA88B5222E04BC3300DDC8EF /* MLXMNIST in Frameworks */ = {isa = PBXBuildFile; productRef = AA88B5212E04BC3300DDC8EF /* MLXMNIST */; };
+		AA88B5242E04BC3300DDC8EF /* MLXVLM in Frameworks */ = {isa = PBXBuildFile; productRef = AA88B5232E04BC3300DDC8EF /* MLXVLM */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		AA37C5F12D4C2D6E00A7A56D /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = AA37C5D42D4C2D6C00A7A56D /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = AA37C5DB2D4C2D6C00A7A56D;
+			remoteInfo = DoChatStudio;
+		};
+		AA37C5FB2D4C2D6E00A7A56D /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = AA37C5D42D4C2D6C00A7A56D /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = AA37C5DB2D4C2D6C00A7A56D;
+			remoteInfo = DoChatStudio;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		AA37C5DC2D4C2D6C00A7A56D /* DoChatStudio.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = DoChatStudio.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		AA37C5F02D4C2D6E00A7A56D /* DoChatStudioTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = DoChatStudioTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		AA37C5FA2D4C2D6E00A7A56D /* DoChatStudioUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = DoChatStudioUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		AA37C6022D4C2D6E00A7A56D /* Exceptions for "DoChatStudio" folder in "DoChatStudio" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+				Views/InspectorViews/InspectorToggleStyle.swift,
+			);
+			target = AA37C5DB2D4C2D6C00A7A56D /* DoChatStudio */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
+/* Begin PBXFileSystemSynchronizedRootGroup section */
+		AA37C5DE2D4C2D6C00A7A56D /* DoChatStudio */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				AA37C6022D4C2D6E00A7A56D /* Exceptions for "DoChatStudio" folder in "DoChatStudio" target */,
+			);
+			path = DoChatStudio;
+			sourceTree = "<group>";
+		};
+		AA37C5F32D4C2D6E00A7A56D /* DoChatStudioTests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = DoChatStudioTests;
+			sourceTree = "<group>";
+		};
+		AA37C5FD2D4C2D6E00A7A56D /* DoChatStudioUITests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = DoChatStudioUITests;
+			sourceTree = "<group>";
+		};
+/* End PBXFileSystemSynchronizedRootGroup section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		AA37C5D92D4C2D6C00A7A56D /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				AA88B5202E04BC3300DDC8EF /* MLXLMCommon in Frameworks */,
+				AA88B51E2E04BC3300DDC8EF /* MLXLLM in Frameworks */,
+				AA88B5242E04BC3300DDC8EF /* MLXVLM in Frameworks */,
+				AA88B51C2E04BC3300DDC8EF /* MLXEmbedders in Frameworks */,
+				AA88B5112E04BC1900DDC8EF /* MLX in Frameworks */,
+				AA88B5172E04BC1900DDC8EF /* MLXLinalg in Frameworks */,
+				AA88B5222E04BC3300DDC8EF /* MLXMNIST in Frameworks */,
+				AA88B5152E04BC1900DDC8EF /* MLXFast in Frameworks */,
+				AA88B5192E04BC1900DDC8EF /* MLXNN in Frameworks */,
+				AA88B5132E04BC1900DDC8EF /* MLXFFT in Frameworks */,
+				AA1BD6A42E108CF8007283CC /* hub-cli in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		AA37C5ED2D4C2D6E00A7A56D /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		AA37C5F72D4C2D6E00A7A56D /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		AA1BD6A22E108CF8007283CC /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		AA37C5D32D4C2D6C00A7A56D = {
+			isa = PBXGroup;
+			children = (
+				AA37C5DE2D4C2D6C00A7A56D /* DoChatStudio */,
+				AA37C5F32D4C2D6E00A7A56D /* DoChatStudioTests */,
+				AA37C5FD2D4C2D6E00A7A56D /* DoChatStudioUITests */,
+				AA1BD6A22E108CF8007283CC /* Frameworks */,
+				AA37C5DD2D4C2D6C00A7A56D /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		AA37C5DD2D4C2D6C00A7A56D /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				AA37C5DC2D4C2D6C00A7A56D /* DoChatStudio.app */,
+				AA37C5F02D4C2D6E00A7A56D /* DoChatStudioTests.xctest */,
+				AA37C5FA2D4C2D6E00A7A56D /* DoChatStudioUITests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		AA37C5DB2D4C2D6C00A7A56D /* DoChatStudio */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = AA37C6032D4C2D6E00A7A56D /* Build configuration list for PBXNativeTarget "DoChatStudio" */;
+			buildPhases = (
+				AA37C5D82D4C2D6C00A7A56D /* Sources */,
+				AA37C5D92D4C2D6C00A7A56D /* Frameworks */,
+				AA37C5DA2D4C2D6C00A7A56D /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				AA37C5DE2D4C2D6C00A7A56D /* DoChatStudio */,
+			);
+			name = DoChatStudio;
+			packageProductDependencies = (
+				AA88B5102E04BC1900DDC8EF /* MLX */,
+				AA88B5122E04BC1900DDC8EF /* MLXFFT */,
+				AA88B5142E04BC1900DDC8EF /* MLXFast */,
+				AA88B5162E04BC1900DDC8EF /* MLXLinalg */,
+				AA88B5182E04BC1900DDC8EF /* MLXNN */,
+				AA88B51B2E04BC3300DDC8EF /* MLXEmbedders */,
+				AA88B51D2E04BC3300DDC8EF /* MLXLLM */,
+				AA88B51F2E04BC3300DDC8EF /* MLXLMCommon */,
+				AA88B5212E04BC3300DDC8EF /* MLXMNIST */,
+				AA88B5232E04BC3300DDC8EF /* MLXVLM */,
+				AA1BD6A32E108CF8007283CC /* hub-cli */,
+			);
+			productName = DoChatStudio;
+			productReference = AA37C5DC2D4C2D6C00A7A56D /* DoChatStudio.app */;
+			productType = "com.apple.product-type.application";
+		};
+		AA37C5EF2D4C2D6E00A7A56D /* DoChatStudioTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = AA37C6082D4C2D6E00A7A56D /* Build configuration list for PBXNativeTarget "DoChatStudioTests" */;
+			buildPhases = (
+				AA37C5EC2D4C2D6E00A7A56D /* Sources */,
+				AA37C5ED2D4C2D6E00A7A56D /* Frameworks */,
+				AA37C5EE2D4C2D6E00A7A56D /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				AA37C5F22D4C2D6E00A7A56D /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				AA37C5F32D4C2D6E00A7A56D /* DoChatStudioTests */,
+			);
+			name = DoChatStudioTests;
+			packageProductDependencies = (
+			);
+			productName = DoChatStudioTests;
+			productReference = AA37C5F02D4C2D6E00A7A56D /* DoChatStudioTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		AA37C5F92D4C2D6E00A7A56D /* DoChatStudioUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = AA37C60B2D4C2D6E00A7A56D /* Build configuration list for PBXNativeTarget "DoChatStudioUITests" */;
+			buildPhases = (
+				AA37C5F62D4C2D6E00A7A56D /* Sources */,
+				AA37C5F72D4C2D6E00A7A56D /* Frameworks */,
+				AA37C5F82D4C2D6E00A7A56D /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				AA37C5FC2D4C2D6E00A7A56D /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				AA37C5FD2D4C2D6E00A7A56D /* DoChatStudioUITests */,
+			);
+			name = DoChatStudioUITests;
+			packageProductDependencies = (
+			);
+			productName = DoChatStudioUITests;
+			productReference = AA37C5FA2D4C2D6E00A7A56D /* DoChatStudioUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		AA37C5D42D4C2D6C00A7A56D /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1620;
+				LastUpgradeCheck = 2600;
+				TargetAttributes = {
+					AA37C5DB2D4C2D6C00A7A56D = {
+						CreatedOnToolsVersion = 16.2;
+					};
+					AA37C5EF2D4C2D6E00A7A56D = {
+						CreatedOnToolsVersion = 16.2;
+						TestTargetID = AA37C5DB2D4C2D6C00A7A56D;
+					};
+					AA37C5F92D4C2D6E00A7A56D = {
+						CreatedOnToolsVersion = 16.2;
+						TestTargetID = AA37C5DB2D4C2D6C00A7A56D;
+					};
+				};
+			};
+			buildConfigurationList = AA37C5D72D4C2D6C00A7A56D /* Build configuration list for PBXProject "DoChatStudio" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+				"es-US",
+			);
+			mainGroup = AA37C5D32D4C2D6C00A7A56D;
+			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				AA88B50F2E04BC1900DDC8EF /* XCRemoteSwiftPackageReference "mlx-swift" */,
+				AA88B51A2E04BC3300DDC8EF /* XCRemoteSwiftPackageReference "mlx-swift-examples" */,
+				AA1BD69F2E108C22007283CC /* XCRemoteSwiftPackageReference "swift-transformers" */,
+			);
+			preferredProjectObjectVersion = 77;
+			productRefGroup = AA37C5DD2D4C2D6C00A7A56D /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				AA37C5DB2D4C2D6C00A7A56D /* DoChatStudio */,
+				AA37C5EF2D4C2D6E00A7A56D /* DoChatStudioTests */,
+				AA37C5F92D4C2D6E00A7A56D /* DoChatStudioUITests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		AA37C5DA2D4C2D6C00A7A56D /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		AA37C5EE2D4C2D6E00A7A56D /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		AA37C5F82D4C2D6E00A7A56D /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		AA37C5D82D4C2D6C00A7A56D /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		AA37C5EC2D4C2D6E00A7A56D /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		AA37C5F62D4C2D6E00A7A56D /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		AA37C5F22D4C2D6E00A7A56D /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = AA37C5DB2D4C2D6C00A7A56D /* DoChatStudio */;
+			targetProxy = AA37C5F12D4C2D6E00A7A56D /* PBXContainerItemProxy */;
+		};
+		AA37C5FC2D4C2D6E00A7A56D /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = AA37C5DB2D4C2D6C00A7A56D /* DoChatStudio */;
+			targetProxy = AA37C5FB2D4C2D6E00A7A56D /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		AA37C6042D4C2D6E00A7A56D /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = NO;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 2;
+				DEAD_CODE_STRIPPING = YES;
+				DEVELOPMENT_ASSET_PATHS = "\"DoChatStudio/Preview Content\"";
+				ENABLE_APP_SANDBOX = YES;
+				ENABLE_FILE_ACCESS_DOWNLOADS_FOLDER = readwrite;
+				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_INCOMING_NETWORK_CONNECTIONS = YES;
+				ENABLE_OUTGOING_NETWORK_CONNECTIONS = YES;
+				ENABLE_PREVIEWS = YES;
+				ENABLE_USER_SELECTED_FILES = readwrite;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = DoChatStudio/Info.plist;
+				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
+				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
+				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphoneos*]" = YES;
+				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphonesimulator*]" = YES;
+				"INFOPLIST_KEY_UILaunchScreen_Generation[sdk=iphoneos*]" = YES;
+				"INFOPLIST_KEY_UILaunchScreen_Generation[sdk=iphonesimulator*]" = YES;
+				"INFOPLIST_KEY_UIStatusBarStyle[sdk=iphoneos*]" = UIStatusBarStyleDefault;
+				"INFOPLIST_KEY_UIStatusBarStyle[sdk=iphonesimulator*]" = UIStatusBarStyleDefault;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				"INFOPLIST_KEY_UISupportsDocumentBrowser[sdk=iphoneos*]" = YES;
+				"INFOPLIST_KEY_UISupportsDocumentBrowser[sdk=iphonesimulator*]" = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks";
+				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
+				MACOSX_DEPLOYMENT_TARGET = 26.0;
+				MARKETING_VERSION = 1.0.1;
+				PRODUCT_BUNDLE_IDENTIFIER = org.example.dochatstudio;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = auto;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx xros xrsimulator";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2,7";
+				XROS_DEPLOYMENT_TARGET = 26.0;
+			};
+			name = Debug;
+		};
+		AA37C6052D4C2D6E00A7A56D /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = NO;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 2;
+				DEAD_CODE_STRIPPING = YES;
+				DEVELOPMENT_ASSET_PATHS = "\"DoChatStudio/Preview Content\"";
+				ENABLE_APP_SANDBOX = YES;
+				ENABLE_FILE_ACCESS_DOWNLOADS_FOLDER = readwrite;
+				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_INCOMING_NETWORK_CONNECTIONS = YES;
+				ENABLE_OUTGOING_NETWORK_CONNECTIONS = YES;
+				ENABLE_PREVIEWS = YES;
+				ENABLE_USER_SELECTED_FILES = readwrite;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = DoChatStudio/Info.plist;
+				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
+				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
+				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphoneos*]" = YES;
+				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphonesimulator*]" = YES;
+				"INFOPLIST_KEY_UILaunchScreen_Generation[sdk=iphoneos*]" = YES;
+				"INFOPLIST_KEY_UILaunchScreen_Generation[sdk=iphonesimulator*]" = YES;
+				"INFOPLIST_KEY_UIStatusBarStyle[sdk=iphoneos*]" = UIStatusBarStyleDefault;
+				"INFOPLIST_KEY_UIStatusBarStyle[sdk=iphonesimulator*]" = UIStatusBarStyleDefault;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				"INFOPLIST_KEY_UISupportsDocumentBrowser[sdk=iphoneos*]" = YES;
+				"INFOPLIST_KEY_UISupportsDocumentBrowser[sdk=iphonesimulator*]" = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks";
+				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
+				MACOSX_DEPLOYMENT_TARGET = 26.0;
+				MARKETING_VERSION = 1.0.1;
+				PRODUCT_BUNDLE_IDENTIFIER = org.example.dochatstudio;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = auto;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx xros xrsimulator";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2,7";
+				XROS_DEPLOYMENT_TARGET = 26.0;
+			};
+			name = Release;
+		};
+		AA37C6062D4C2D6E00A7A56D /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEAD_CODE_STRIPPING = YES;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		AA37C6072D4C2D6E00A7A56D /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEAD_CODE_STRIPPING = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_COMPILATION_MODE = wholemodule;
+			};
+			name = Release;
+		};
+		AA37C6092D4C2D6E00A7A56D /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEAD_CODE_STRIPPING = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.2;
+				MACOSX_DEPLOYMENT_TARGET = 15.2;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = org.example.dochatstudio.tests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = auto;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx xros xrsimulator";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2,7";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/DoChatStudio.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/DoChatStudio";
+				XROS_DEPLOYMENT_TARGET = 2.2;
+			};
+			name = Debug;
+		};
+		AA37C60A2D4C2D6E00A7A56D /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEAD_CODE_STRIPPING = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.2;
+				MACOSX_DEPLOYMENT_TARGET = 15.2;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = org.example.dochatstudio.tests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = auto;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx xros xrsimulator";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2,7";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/DoChatStudio.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/DoChatStudio";
+				XROS_DEPLOYMENT_TARGET = 2.2;
+			};
+			name = Release;
+		};
+		AA37C60C2D4C2D6E00A7A56D /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEAD_CODE_STRIPPING = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.2;
+				MACOSX_DEPLOYMENT_TARGET = 15.2;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = org.example.dochatstudio.uitests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = auto;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx xros xrsimulator";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2,7";
+				TEST_TARGET_NAME = DoChatStudio;
+				XROS_DEPLOYMENT_TARGET = 2.2;
+			};
+			name = Debug;
+		};
+		AA37C60D2D4C2D6E00A7A56D /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEAD_CODE_STRIPPING = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.2;
+				MACOSX_DEPLOYMENT_TARGET = 15.2;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = org.example.dochatstudio.uitests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = auto;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx xros xrsimulator";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2,7";
+				TEST_TARGET_NAME = DoChatStudio;
+				XROS_DEPLOYMENT_TARGET = 2.2;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		AA37C5D72D4C2D6C00A7A56D /* Build configuration list for PBXProject "DoChatStudio" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				AA37C6062D4C2D6E00A7A56D /* Debug */,
+				AA37C6072D4C2D6E00A7A56D /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		AA37C6032D4C2D6E00A7A56D /* Build configuration list for PBXNativeTarget "DoChatStudio" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				AA37C6042D4C2D6E00A7A56D /* Debug */,
+				AA37C6052D4C2D6E00A7A56D /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		AA37C6082D4C2D6E00A7A56D /* Build configuration list for PBXNativeTarget "DoChatStudioTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				AA37C6092D4C2D6E00A7A56D /* Debug */,
+				AA37C60A2D4C2D6E00A7A56D /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		AA37C60B2D4C2D6E00A7A56D /* Build configuration list for PBXNativeTarget "DoChatStudioUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				AA37C60C2D4C2D6E00A7A56D /* Debug */,
+				AA37C60D2D4C2D6E00A7A56D /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		AA1BD69F2E108C22007283CC /* XCRemoteSwiftPackageReference "swift-transformers" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/huggingface/swift-transformers";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.1.21;
+			};
+		};
+		AA88B50F2E04BC1900DDC8EF /* XCRemoteSwiftPackageReference "mlx-swift" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/ml-explore/mlx-swift.git";
+			requirement = {
+				branch = main;
+				kind = branch;
+			};
+		};
+		AA88B51A2E04BC3300DDC8EF /* XCRemoteSwiftPackageReference "mlx-swift-examples" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/ml-explore/mlx-swift-examples";
+			requirement = {
+				branch = main;
+				kind = branch;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		AA1BD6A32E108CF8007283CC /* hub-cli */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = AA1BD69F2E108C22007283CC /* XCRemoteSwiftPackageReference "swift-transformers" */;
+			productName = "hub-cli";
+		};
+		AA88B5102E04BC1900DDC8EF /* MLX */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = AA88B50F2E04BC1900DDC8EF /* XCRemoteSwiftPackageReference "mlx-swift" */;
+			productName = MLX;
+		};
+		AA88B5122E04BC1900DDC8EF /* MLXFFT */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = AA88B50F2E04BC1900DDC8EF /* XCRemoteSwiftPackageReference "mlx-swift" */;
+			productName = MLXFFT;
+		};
+		AA88B5142E04BC1900DDC8EF /* MLXFast */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = AA88B50F2E04BC1900DDC8EF /* XCRemoteSwiftPackageReference "mlx-swift" */;
+			productName = MLXFast;
+		};
+		AA88B5162E04BC1900DDC8EF /* MLXLinalg */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = AA88B50F2E04BC1900DDC8EF /* XCRemoteSwiftPackageReference "mlx-swift" */;
+			productName = MLXLinalg;
+		};
+		AA88B5182E04BC1900DDC8EF /* MLXNN */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = AA88B50F2E04BC1900DDC8EF /* XCRemoteSwiftPackageReference "mlx-swift" */;
+			productName = MLXNN;
+		};
+		AA88B51B2E04BC3300DDC8EF /* MLXEmbedders */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = AA88B51A2E04BC3300DDC8EF /* XCRemoteSwiftPackageReference "mlx-swift-examples" */;
+			productName = MLXEmbedders;
+		};
+		AA88B51D2E04BC3300DDC8EF /* MLXLLM */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = AA88B51A2E04BC3300DDC8EF /* XCRemoteSwiftPackageReference "mlx-swift-examples" */;
+			productName = MLXLLM;
+		};
+		AA88B51F2E04BC3300DDC8EF /* MLXLMCommon */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = AA88B51A2E04BC3300DDC8EF /* XCRemoteSwiftPackageReference "mlx-swift-examples" */;
+			productName = MLXLMCommon;
+		};
+		AA88B5212E04BC3300DDC8EF /* MLXMNIST */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = AA88B51A2E04BC3300DDC8EF /* XCRemoteSwiftPackageReference "mlx-swift-examples" */;
+			productName = MLXMNIST;
+		};
+		AA88B5232E04BC3300DDC8EF /* MLXVLM */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = AA88B51A2E04BC3300DDC8EF /* XCRemoteSwiftPackageReference "mlx-swift-examples" */;
+			productName = MLXVLM;
+		};
+/* End XCSwiftPackageProductDependency section */
+	};
+	rootObject = AA37C5D42D4C2D6C00A7A56D /* Project object */;
+}

@@ -81,7 +81,7 @@ separately and remain subject to the license published by each model's author.
 
 ## Requirements
 
-- macOS 26, iOS 26, or visionOS 26 as currently configured in the Xcode project
+- macOS 26, iOS 26, or visionOS 26 as currently configured in the project
 - Xcode with the corresponding platform SDKs
 - Apple silicon for MLX inference
 - Internet access for the initial Swift package resolution and model downloads
@@ -97,23 +97,22 @@ The Xcode project resolves these Swift packages:
 - [mlx-swift](https://github.com/ml-explore/mlx-swift)
 - [mlx-swift-examples](https://github.com/ml-explore/mlx-swift-examples)
 - [swift-transformers](https://github.com/huggingface/swift-transformers)
-- `FlexView`, currently referenced as a local Swift package at
-  `../../../FlexView`
-
-The local `FlexView` package must exist at the configured relative path before
-the project can build. If your checkout uses a different layout, update the
-local package reference in Xcode.
 
 ## Building
 
 1. Open `DoChatStudio.xcodeproj` in Xcode.
-2. Confirm that the local `FlexView` package reference resolves.
-3. Allow Xcode to resolve the remote Swift package dependencies.
-4. Select the `DoChatStudio` scheme.
-5. Choose a compatible Apple silicon destination and build or run.
+2. Allow Xcode to resolve the remote Swift package dependencies.
+3. Select the `DoChatStudio` scheme.
+4. Choose a compatible Apple silicon destination.
+5. Select your own development team in Signing & Capabilities if the chosen
+   destination requires code signing.
+6. Build or run the app.
 
-The project includes unit-test and UI-test targets. StoreKit behavior can be
-exercised with `DoChatStudio/doChatStudio.storekit`.
+The project includes unit-test and UI-test targets. The public project uses
+neutral `org.example.dochatstudio` bundle and document identifiers and does
+not include private signing, entitlement, certificate, or StoreKit test
+configuration. Developers who need iCloud or local StoreKit testing should
+create their own capability and StoreKit configuration files in Xcode.
 
 ## Project status
 
